@@ -5,7 +5,7 @@ import { Award, Users, ShieldCheck, Trophy } from 'lucide-react';
 const leaderItems = [
   {
     role: 'Ketua OSIS',
-    org: 'SMA Negeri 3 Seunagan',
+    org: 'SMAN 3 Seunagan',
     period: '2019 - 2021',
     achievement: 'Ranked 1st in class & led major student initiatives.',
     icon: <Trophy className="text-[#00ff9f]" />
