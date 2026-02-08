@@ -76,7 +76,7 @@ export const About = () => {
               <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800/50">
                 <h5 className="text-[#00d4ff] font-mono text-xs uppercase mb-3">Organizations</h5>
                 <ul className="space-y-2 text-slate-300 text-sm">
-                  <li className="flex items-center gap-2">• Ketua OSIS SMKN 3 Seunagan</li>
+                  <li className="flex items-center gap-2">• Ketua OSIS SMAN 3 Seunagan</li>
                   <li className="flex items-center gap-2">• HIMATIF UTU Member</li>
                   <li className="flex items-center gap-2">• APEL Green Aceh Member</li>
                 </ul>
