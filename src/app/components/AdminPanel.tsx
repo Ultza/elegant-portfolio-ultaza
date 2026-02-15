@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../supabaseClient';
 
-export const AdminPanel = () => {
+interface AdminPanelProps {
+  onLogout?: () => void;
+}
+
+export const AdminPanel = ({ onLogout }: AdminPanelProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -21,7 +25,17 @@ export const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-[#0a192f] p-8">
-      <h2 className="text-3xl font-bold text-white mb-8">Pesan Masuk</h2>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-white">Pesan Masuk</h2>
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="px-5 py-2 border border-red-500 text-red-500 text-sm rounded hover:bg-red-500/10 transition-colors"
+          >
+            Log Out
+          </button>
+        )}
+      </div>
       {loading ? (
         <div className="text-white">Loading...</div>
       ) : fetchError ? (

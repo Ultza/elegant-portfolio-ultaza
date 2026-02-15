@@ -17,6 +17,12 @@ export default function App() {
   const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel'>('portfolio');
   const [isAdmin, setIsAdmin] = React.useState(false);
 
+  // Fungsi logout admin
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setActivePage('portfolio');
+  };
+
   return (
     <div className="min-h-screen bg-[#0a192f] font-sans selection:bg-[#00ff9f]/30 selection:text-[#00ff9f] scroll-smooth">
       <Toaster 
@@ -27,7 +33,12 @@ export default function App() {
       />
       {activePage === 'portfolio' && (
         <>
-          <Navbar onProfileClick={() => setActivePage('profile')} />
+          <Navbar 
+            onProfileClick={() => setActivePage('profile')}
+            onAdminLoginClick={() => setActivePage('admin-login')}
+            isAdmin={isAdmin}
+            onLogout={handleLogout}
+          />
           <main>
             <Hero onProfileClick={() => setActivePage('profile')} />
             <About />
@@ -36,7 +47,8 @@ export default function App() {
             <Projects />
             <Leadership />
             <Contact />
-            <div className="flex justify-center mt-8">
+            {/* Tombol login tetap muncul di bawah pada mobile */}
+            <div className="flex justify-center mt-8 md:hidden">
               <button
                 className="bg-[#00ff9f] text-[#0a192f] px-4 py-2 rounded font-bold hover:bg-[#00e08b] transition-all"
                 onClick={() => setActivePage('admin-login')}
@@ -55,7 +67,7 @@ export default function App() {
         <AdminLogin onLogin={() => { setIsAdmin(true); setActivePage('admin-panel'); }} />
       )}
       {activePage === 'admin-panel' && isAdmin && (
-        <AdminPanel />
+        <AdminPanel onLogout={handleLogout} />
       )}
     </div>
   );

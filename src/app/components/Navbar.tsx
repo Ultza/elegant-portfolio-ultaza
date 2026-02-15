@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Code2, Cpu, Laptop } from 'lucide-react';
 
-export const Navbar = ({ onProfileClick }: { onProfileClick?: () => void }) => {
+interface NavbarProps {
+  onProfileClick?: () => void;
+  onAdminLoginClick?: () => void;
+  isAdmin?: boolean;
+  onLogout?: () => void;
+}
+
+export const Navbar = ({ onProfileClick, onAdminLoginClick, isAdmin, onLogout }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -60,6 +67,22 @@ export const Navbar = ({ onProfileClick }: { onProfileClick?: () => void }) => {
           >
             Hire Me
           </a>
+          {/* Tombol login/logout admin di kanan atas */}
+          {!isAdmin ? (
+            <button
+              onClick={onAdminLoginClick}
+              className="ml-4 px-5 py-2 border border-[#00ff9f] text-[#00ff9f] text-sm rounded hover:bg-[#00ff9f]/10 transition-colors"
+            >
+              Admin Login
+            </button>
+          ) : (
+            <button
+              onClick={onLogout}
+              className="ml-4 px-5 py-2 border border-red-500 text-red-500 text-sm rounded hover:bg-red-500/10 transition-colors"
+            >
+              Log Out
+            </button>
+          )}
         </div>
 
         {/* Mobile Toggle */}
