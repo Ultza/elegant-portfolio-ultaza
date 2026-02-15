@@ -1,21 +1,35 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import supabase from '../supabaseClient';
 import { Send, Mail, MapPin, Linkedin, Terminal, ArrowRight } from 'lucide-react';
 
 export const Contact = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-    toast.success("Message received! I will get back to you soon.", {
-      style: {
-        background: '#112240',
-        color: '#00ff9f',
-        border: '1px solid #00ff9f33'
-      }
-    });
-    reset();
+  const onSubmit = async (data: any) => {
+    try {
+      const { error } = await supabase.from('contacts').insert([
+        {
+          name: data.name,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      if (error) throw error;
+      toast.success("Message received! I will get back to you soon.", {
+        style: {
+          background: '#112240',
+          color: '#00ff9f',
+          border: '1px solid #00ff9f33'
+        }
+      });
+      reset();
+    } catch (err: any) {
+      toast.error("Failed to send message. Please try again later.");
+    }
   };
 
   return (

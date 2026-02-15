@@ -10,9 +10,12 @@ import { Leadership } from './components/Leadership';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { ProfilePage } from './components/ProfilePage';
+import { AdminLogin } from './components/AdminLogin';
+import { AdminPanel } from './components/AdminPanel';
 
 export default function App() {
-  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile'>('portfolio');
+  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel'>('portfolio');
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-[#0a192f] font-sans selection:bg-[#00ff9f]/30 selection:text-[#00ff9f] scroll-smooth">
@@ -22,8 +25,7 @@ export default function App() {
         richColors 
         theme="dark"
       />
-      
-      {activePage === 'portfolio' ? (
+      {activePage === 'portfolio' && (
         <>
           <Navbar onProfileClick={() => setActivePage('profile')} />
           <main>
@@ -34,11 +36,26 @@ export default function App() {
             <Projects />
             <Leadership />
             <Contact />
+            <div className="flex justify-center mt-8">
+              <button
+                className="bg-[#00ff9f] text-[#0a192f] px-4 py-2 rounded font-bold hover:bg-[#00e08b] transition-all"
+                onClick={() => setActivePage('admin-login')}
+              >
+                Admin Login
+              </button>
+            </div>
           </main>
           <Footer />
         </>
-      ) : (
+      )}
+      {activePage === 'profile' && (
         <ProfilePage onBack={() => setActivePage('portfolio')} />
+      )}
+      {activePage === 'admin-login' && (
+        <AdminLogin onLogin={() => { setIsAdmin(true); setActivePage('admin-panel'); }} />
+      )}
+      {activePage === 'admin-panel' && isAdmin && (
+        <AdminPanel />
       )}
     </div>
   );
