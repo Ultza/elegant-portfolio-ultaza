@@ -1,8 +1,9 @@
 ﻿import React from 'react';
 import { motion } from 'motion/react';
 import dicodingLogo from '@/assets/dicoding.png';
-import kemnakerLogo from '@/assets/Kementerian-Ketenagakerjaan.jpg';
-import gatakiLogo from '@/assets/logo_PT__GATAKI_KONSTRUKSI_MANDIRI_1634566589.png';
+import kemnakerLogo from '@/assets/logo_PT__GATAKI_KONSTRUKSI_MANDIRI_1634566589.png';
+import komdigiLogo from '@/assets/KOMDIGI.png';
+import dinasLogo from '@/assets/Dinas-Kebudayaan-Pariwisata-Pemuda-dan-Olahraga.png';
 
 interface Certificate {
   title: string;
@@ -115,8 +116,9 @@ const certificates: Certificate[] = [
 
 const getIssuerLogo = (issuer: string, title: string) => {
   if (issuer === 'Dicoding') return dicodingLogo;
-  if (issuer === 'Kementerian Ketenagakerjaan' && title.toLowerCase().includes('k3')) return gatakiLogo;
-  if (issuer === 'Kementerian Ketenagakerjaan') return kemnakerLogo;
+  if (issuer === 'Kementerian Ketenagakerjaan' || title.toLowerCase().includes('k3')) return kemnakerLogo;
+  if (issuer === 'Cyber Academy' || issuer === 'Cloud Computing ID') return komdigiLogo;
+  if (title.toLowerCase().includes('okp') || title.toLowerCase().includes('kepemudaan')) return dinasLogo;
   return null;
 };
 
@@ -158,6 +160,7 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
                           src={logo}
                           alt={`${cert.issuer} logo`}
                           className="h-full w-full object-contain"
+                          style={{ objectFit: 'contain' }}
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center text-center text-slate-400">
