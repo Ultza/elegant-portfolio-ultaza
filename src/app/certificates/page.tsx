@@ -1,5 +1,8 @@
 ﻿import React from 'react';
 import { motion } from 'motion/react';
+import dicodingLogo from '@/assets/dicoding.png';
+import kemnakerLogo from '@/assets/Kementerian-Ketenagakerjaan.jpg';
+import gatakiLogo from '@/assets/logo_PT__GATAKI_KONSTRUKSI_MANDIRI_1634566589.png';
 
 interface Certificate {
   title: string;
@@ -10,6 +13,20 @@ interface Certificate {
 }
 
 const certificates: Certificate[] = [
+  { 
+    title: 'Supervisor K3 Konstruksi', 
+    issuer: 'Kementerian Ketenagakerjaan', 
+    file: '/certificates/SERTIFIKAT-SUPERVISOR-K3-KONSTRUKSI-UL-TAZASYAH.pdf', 
+    date: '2025', 
+    category: 'Safety' 
+  },
+    { 
+    title: 'Pelatihan OKP', 
+    issuer: 'Organisasi', 
+    file: '/certificates/PELATIHAN-OKP-ULTAZA.pdf', 
+    date: '2025', 
+    category: 'Leadership' 
+  },
   { 
     title: 'Front-End Web Development', 
     issuer: 'Dicoding', 
@@ -74,13 +91,6 @@ const certificates: Certificate[] = [
     category: 'AI' 
   },
   { 
-    title: 'Supervisor K3 Konstruksi', 
-    issuer: 'Kementerian Ketenagakerjaan', 
-    file: '/certificates/SERTIFIKAT-SUPERVISOR-K3-KONSTRUKSI-UL-TAZASYAH.pdf', 
-    date: '2025', 
-    category: 'Safety' 
-  },
-  { 
     title: 'Financial Literacy', 
     issuer: 'CIMB Niaga / OJK', 
     file: '/certificates/Introduction-to-Financial-Literacy.pdf', 
@@ -95,13 +105,6 @@ const certificates: Certificate[] = [
     category: 'Education' 
   },
   { 
-    title: 'Pelatihan OKP', 
-    issuer: 'Organisasi', 
-    file: '/certificates/PELATIHAN-OKP-ULTAZA.pdf', 
-    date: '2025', 
-    category: 'Leadership' 
-  },
-  { 
     title: 'Memulai Pemrograman Python', 
     issuer: 'Dicoding', 
     file: '/certificates/Sertifikatt-Memulai-Pemrograman-dengan-Python.pdf', 
@@ -109,6 +112,13 @@ const certificates: Certificate[] = [
     category: 'Web Development' 
   }
 ];
+
+const getIssuerLogo = (issuer: string, title: string) => {
+  if (issuer === 'Dicoding') return dicodingLogo;
+  if (issuer === 'Kementerian Ketenagakerjaan' && title.toLowerCase().includes('k3')) return gatakiLogo;
+  if (issuer === 'Kementerian Ketenagakerjaan') return kemnakerLogo;
+  return null;
+};
 
 export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
   return (
@@ -138,14 +148,30 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
               transition={{ duration: 0.4 }}
               className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f]"
             >
-              <a href={cert.file} target="_blank" rel="noopener noreferrer" className="block">
-                <div className="h-44 bg-slate-900 rounded-xl flex items-center justify-center mb-4 border border-slate-800">
-                  <span className="text-slate-400 text-sm">PDF File</span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
-                <p className="text-slate-300 text-sm mb-1">Issuer: {cert.issuer}</p>
-                {cert.date && <p className="text-slate-500 text-xs mb-3">Date: {cert.date}</p>}
-              </a>
+              {(() => {
+                const logo = getIssuerLogo(cert.issuer, cert.title);
+                return (
+                  <a href={cert.file} target="_blank" rel="noopener noreferrer" className="block">
+                    <div className="h-44 bg-slate-900 rounded-xl flex items-center justify-center mb-4 border border-slate-800 p-3">
+                      {logo ? (
+                        <img
+                          src={logo}
+                          alt={`${cert.issuer} logo`}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-center text-slate-400">
+                          <span className="text-sm font-semibold">PDF</span>
+                          <span className="text-xs mt-1">No logo available</span>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
+                    <p className="text-slate-300 text-sm mb-1">Issuer: {cert.issuer}</p>
+                    {cert.date && <p className="text-slate-500 text-xs mb-3">Date: {cert.date}</p>}
+                  </a>
+                );
+              })()}
               <a
                 href={cert.file}
                 target="_blank"
