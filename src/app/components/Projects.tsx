@@ -2,29 +2,32 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, Github, Monitor, Globe, Shield } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import TOKOLAPTOP_IMG from '../../assets/TOKOLAPTOP.jpeg';
-import DISKOMINSA_IMG from '../../assets/DISKOMINSA.jpeg';
-import FORESTWACTH_IMG from '../../assets/FORESTWACTH.jpeg';
+
+const assets = {
+  TOKOLAPTOP_IMG: new URL('../../assets/TOKOLAPTOP.jpeg', import.meta.url).href,
+  DISKOMINSA_IMG: new URL('../../assets/DISKOMINSA.jpeg', import.meta.url).href,
+  FORESTWACTH_IMG: new URL('../../assets/FORESTWACTH.jpeg', import.meta.url).href,
+};
 
 const projects = [
   {
     title: 'Website Penjualan Laptop Toko Hasnitaria',
     description: 'A robust e-commerce platform designed for laptop hardware sales, featuring product management and order flows.',
-    image: TOKOLAPTOP_IMG,
+    image: assets.TOKOLAPTOP_IMG,
     tags: ['E-commerce', 'PHP', 'Laravel', 'MySQL'],
     icon: <Monitor size={20} />
   },
   {
     title: 'News Features Integration - Diskominsa',
     description: 'Integrated advanced news categorization and management features into the official Diskominsa Aceh Barat website using CI3.',
-    image: DISKOMINSA_IMG,
+    image: assets.DISKOMINSA_IMG,
     tags: ['CodeIgniter 3', 'Web Integration', 'Government'],
     icon: <Globe size={20} />
   },
   {
     title: 'Forest Guard Dashboard',
     description: 'A green infrastructure monitoring dashboard for forestry stewardship and realtime environmental alerts.',
-    image: FORESTWACTH_IMG,
+    image: assets.FORESTWACTH_IMG,
     tags: ['React', 'Tailwind CSS', 'GIS', 'Dashboard'],
     icon: <Shield size={20} />,
     demoUrl: 'https://forest-guard-dashboard.vercel.app/'
