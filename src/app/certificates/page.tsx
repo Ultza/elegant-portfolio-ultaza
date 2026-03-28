@@ -48,7 +48,7 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
               transition={{ duration: 0.4 }}
               className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f]"
             >
-              <a href={cert.file} target="_blank" rel="noreferrer" className="block">
+              <a href={cert.file} target="_blank" rel="noopener noreferrer" download className="block">
                 <div className="h-44 bg-slate-900 rounded-xl flex items-center justify-center mb-4 border border-slate-800">
                   <span className="text-slate-400 text-sm">PDF File</span>
                 </div>
@@ -59,7 +59,8 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
               <a
                 href={cert.file}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
+                download
                 className="inline-block mt-2 px-4 py-2 text-sm font-semibold rounded bg-[#00ff9f] text-[#0a192f] hover:bg-[#66ffc0] transition-all"
               >
                 Lihat PDF
