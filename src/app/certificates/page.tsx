@@ -1,5 +1,18 @@
 ﻿import React from 'react';
 import { motion } from 'motion/react';
+
+type ImageProps = {
+  src: string;
+  alt: string;
+  className?: string;
+  fill?: boolean;
+  unoptimized?: boolean;
+};
+
+const Image: React.FC<ImageProps> = ({ src, alt, className }) => (
+  <img src={src} alt={alt} className={className} />
+);
+
 import dicodingLogo from '@/assets/dicoding.png';
 import gatakiLogo from '@/assets/logo_PT__GATAKI_KONSTRUKSI_MANDIRI_1634566589.png';
 import komdigiLogo from '@/assets/KOMDIGI.png';
@@ -12,7 +25,7 @@ interface Certificate {
   file: string;
   date?: string;
   category?: string;
-  logoAsset?: string;
+  logoAsset: string;
 }
 
 const certificates: Certificate[] = [
@@ -109,7 +122,8 @@ const certificates: Certificate[] = [
     issuer: 'CIMB Niaga / OJK', 
     file: '/certificates/Introduction-to-Financial-Literacy.pdf', 
     date: '2025', 
-    category: 'Finance' 
+    category: 'Finance',
+    logoAsset: dinasLogo
   },
   { 
     title: 'Computational Thinking', 
@@ -124,7 +138,8 @@ const certificates: Certificate[] = [
     issuer: 'Dicoding', 
     file: '/certificates/Sertifikatt-Memulai-Pemrograman-dengan-Python.pdf', 
     date: '2025', 
-    category: 'Web Development' 
+    category: 'Web Development',
+    logoAsset: dicodingLogo
   }
 ];
 
@@ -157,20 +172,14 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
               className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f]"
             >
               <a href={cert.file} target="_blank" rel="noopener noreferrer" className="block">
-                <div className="h-44 bg-slate-900 rounded-xl flex items-center justify-center mb-4 border border-slate-800 p-3">
-                  {cert.logoAsset ? (
-                    <img
-                      src={cert.logoAsset}
-                      alt={cert.title}
-                      className="h-full w-full object-contain"
-                      style={{ objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center text-slate-400">
-                      <span className="text-sm font-semibold">PDF</span>
-                      <span className="text-xs mt-1">No logo available</span>
-                    </div>
-                  )}
+                <div className="h-44 bg-slate-900 rounded-xl relative mb-4 border border-slate-800 p-3 overflow-hidden">
+                  <Image
+                    src={cert.logoAsset}
+                    alt={`${cert.issuer} logo`}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
                 <p className="text-slate-300 text-sm mb-1">Issuer: {cert.issuer}</p>
