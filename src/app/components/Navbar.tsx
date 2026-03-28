@@ -5,11 +5,12 @@ import { Menu, X, Code2, Cpu, Laptop } from 'lucide-react';
 interface NavbarProps {
   onProfileClick?: () => void;
   onAdminLoginClick?: () => void;
+  onCertificatesClick?: () => void;
   isAdmin?: boolean;
   onLogout?: () => void;
 }
 
-export const Navbar = ({ onProfileClick, onAdminLoginClick, isAdmin, onLogout }: NavbarProps) => {
+export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick, isAdmin, onLogout }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -26,6 +27,7 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, isAdmin, onLogout }:
     { name: 'Experience', href: '#experience' },
     { name: 'Skills', href: '#skills' },
     { name: 'Projects', href: '#projects' },
+    { name: 'Certificates', href: '/certificates', onClick: onCertificatesClick },
     { name: 'Contact', href: '#contact' },
   ];
 
@@ -49,6 +51,12 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, isAdmin, onLogout }:
             <a
               key={link.name}
               href={link.href}
+              onClick={(e) => {
+                if (link.onClick) {
+                  e.preventDefault();
+                  link.onClick();
+                }
+              }}
               className="text-sm font-medium text-slate-400 hover:text-[#00ff9f] transition-all relative group"
             >
               {link.name}

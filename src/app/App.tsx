@@ -12,9 +12,10 @@ import { Footer } from './components/Footer';
 import { ProfilePage } from './components/ProfilePage';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminPanel } from './components/AdminPanel';
+import { CertificatesPage } from './certificates/page';
 
 export default function App() {
-  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel'>('portfolio');
+  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel' | 'certificates'>('portfolio');
   const [isAdmin, setIsAdmin] = React.useState(false);
 
   // Fungsi logout admin
@@ -35,6 +36,7 @@ export default function App() {
         <>
           <Navbar 
             onProfileClick={() => setActivePage('profile')}
+            onCertificatesClick={() => setActivePage('certificates')}
             onAdminLoginClick={() => setActivePage('admin-login')}
             isAdmin={isAdmin}
             onLogout={handleLogout}
@@ -62,6 +64,19 @@ export default function App() {
       )}
       {activePage === 'profile' && (
         <ProfilePage onBack={() => setActivePage('portfolio')} />
+      )}
+      {activePage === 'certificates' && (
+        <>
+          <Navbar 
+            onProfileClick={() => setActivePage('profile')}
+            onCertificatesClick={() => setActivePage('certificates')}
+            onAdminLoginClick={() => setActivePage('admin-login')}
+            isAdmin={isAdmin}
+            onLogout={handleLogout}
+          />
+          <CertificatesPage onBack={() => setActivePage('portfolio')} />
+          <Footer />
+        </>
       )}
       {activePage === 'admin-login' && (
         <AdminLogin onLogin={() => { setIsAdmin(true); setActivePage('admin-panel'); }} />
