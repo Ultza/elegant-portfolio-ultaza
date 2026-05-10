@@ -1,5 +1,6 @@
-﻿import React from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import supabase from '../supabaseClient';
 
 type ImageProps = {
   src: string;
@@ -13,137 +14,104 @@ const Image: React.FC<ImageProps> = ({ src, alt, className }) => (
   <img src={src} alt={alt} className={className} />
 );
 
-import dicodingLogo from '@/assets/dicoding.png';
-import gatakiLogo from '@/assets/logo_PT__GATAKI_KONSTRUKSI_MANDIRI_1634566589.png';
-import komdigiLogo from '@/assets/KOMDIGI.png';
-import microsoftLogo from '@/assets/microsoft.jpg';
-import dinasLogo from '@/assets/Dinas-Kebudayaan-Pariwisata-Pemuda-dan-Olahraga.png';
-
 interface Certificate {
+  id: string;
   title: string;
   issuer: string;
   file: string;
-  date?: string;
-  category?: string;
-  logoAsset: string;
+  date: string;
+  category: string;
+  logo_url: string;
+  created_at: string;
 }
 
-const certificates: Certificate[] = [
-  { 
-    title: 'Supervisor K3 Konstruksi', 
-    issuer: 'Kementerian Ketenagakerjaan', 
-    file: '/certificates/SERTIFIKAT-SUPERVISOR-K3-KONSTRUKSI-UL-TAZASYAH.pdf', 
-    date: '2025', 
-    category: 'Safety',
-    logoAsset: gatakiLogo
-  },
-    { 
-    title: 'Pelatihan OKP', 
-    issuer: 'Organisasi', 
-    file: '/certificates/PELATIHAN-OKP-ULTAZA.pdf', 
-    date: '2025', 
-    category: 'Leadership',
-    logoAsset: dinasLogo
-  },
-  { 
-    title: 'Front-End Web Development', 
-    issuer: 'Dicoding', 
-    file: '/certificates/sertifikat-front-end-dicoding.pdf', 
-    date: '2025', 
-    category: 'Web Development',
-    logoAsset: dicodingLogo
-  },
-  { 
-    title: 'Pemrograman JavaScript', 
-    issuer: 'Dicoding', 
-    file: '/certificates/sertifikat-pemograman-javascript-dicoding.pdf', 
-    date: '2025', 
-    category: 'Web Development',
-    logoAsset: dicodingLogo
-  },
-  { 
-    title: 'Pemrograman Website Dasar', 
-    issuer: 'Dicoding', 
-    file: '/certificates/sertifikat-pemrograman-website-dicoding.pdf', 
-    date: '2025', 
-    category: 'Web Development',
-    logoAsset: dicodingLogo
-  },
-  { 
-    title: 'Microsoft Fabric', 
-    issuer: 'Dicoding', 
-    file: '/certificates/sertifikat-microsoft-fabric-dicoding.pdf', 
-    date: '2025', 
-    category: 'Data Science',
-    logoAsset: dicodingLogo
-  },
-  { 
-    title: 'Ethical Hacker For Dummies', 
-    issuer: 'Cyber Academy', 
-    file: '/certificates/Sertifikat_ULTAZA-SYAH_Ethical-Hacker-For-Dummies.pdf', 
-    date: '2025', 
-    category: 'Cybersecurity',
-    logoAsset: komdigiLogo
-  },
-  { 
-    title: 'Cyber Security Awareness', 
-    issuer: 'Cyber Academy', 
-    file: '/certificates/Sertifikat_ULTAZA-SYAH_Introduction-to-Cyber-Security-and-Career-Awareness.pdf', 
-    date: '2025', 
-    category: 'Cybersecurity',
-    logoAsset: komdigiLogo
-  },
-  { 
-    title: 'AI Engineer For Milenial', 
-    issuer: 'Cloud Computing ID', 
-    file: '/certificates/Sertifikat_ULTAZASYAH_AI-Engineer-For-Milenial.pdf', 
-    date: '2025', 
-    category: 'AI',
-    logoAsset: komdigiLogo
-  },
-  { 
-    title: 'Introduction To Cloud Computing', 
-    issuer: 'Cloud Computing ID', 
-    file: '/certificates/Sertifikat_ULTAZASYAH_Introduction-To-Cloud-Computing.pdf', 
-    date: '2025', 
-    category: 'Cloud',
-    logoAsset: komdigiLogo
-  },
-  { 
-    title: 'Gen-AI dengan Microsoft Azure', 
-    issuer: 'Microsoft', 
-    file: '/certificates/Membangun-Aplikasi-Gen-AI-dengan-Microsoft-Azure.pdf', 
-    date: '2025', 
-    category: 'AI',
-    logoAsset: microsoftLogo
-  },
-  { 
-    title: 'Financial Literacy', 
-    issuer: 'CIMB Niaga / OJK', 
-    file: '/certificates/Introduction-to-Financial-Literacy.pdf', 
-    date: '2025', 
-    category: 'Finance',
-    logoAsset: dinasLogo
-  },
-  { 
-    title: 'Computational Thinking', 
-    issuer: 'Bebras Indonesia', 
-    file: '/certificates/Sertifikat_ULTAZASYAH_Computational-Thinking_Cara-Berpikir-Logis-untuk-Mengatasi-Masalah-Jenjang-SMA.pdf', 
-    date: '2025', 
-    category: 'Education',
-    logoAsset: dinasLogo
-  },
-  { 
-    title: 'Memulai Pemrograman Python', 
-    issuer: 'Dicoding', 
-    file: '/certificates/Sertifikatt-Memulai-Pemrograman-dengan-Python.pdf', 
-    date: '2025', 
-    category: 'Web Development',
-    logoAsset: dicodingLogo
-  }
-];
-
 export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Sanitize file path for display and opening
+  const sanitizeFilePath = (filePath: string): string => {
+    if (!filePath) return '';
+
+    // If it's already a web path, return as is
+    if (filePath.startsWith('/certificates/')) {
+      return filePath;
+    }
+
+    // If it's a file:// URL, extract filename and convert to web path
+    if (filePath.startsWith('file:///')) {
+      try {
+        // Extract filename from Windows path
+        const url = new URL(filePath);
+        const pathname = decodeURIComponent(url.pathname);
+        const filename = pathname.split('\\').pop() || pathname.split('/').pop() || '';
+        return `/certificates/${filename}`;
+      } catch (error) {
+        console.error('Error parsing file URL:', error);
+        return filePath;
+      }
+    }
+
+    // If it's just a filename, add certificates path
+    if (!filePath.includes('/') && !filePath.includes('\\')) {
+      return `/certificates/${filePath}`;
+    }
+
+    // For other cases, try to extract filename
+    const filename = filePath.split('\\').pop() || filePath.split('/').pop() || '';
+    return `/certificates/${filename}`;
+  };
+
+  // Handle opening PDF
+  const handleOpenPDF = (filePath: string) => {
+    const pdfUrl = sanitizeFilePath(filePath);
+    console.log('Opening PDF:', pdfUrl);
+    if (!pdfUrl) {
+      alert('File sertifikat belum tersedia');
+      return;
+    }
+    window.open(pdfUrl, '_blank');
+  };
+
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const { data, error } = await supabase
+          .from('certificates')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.log('Supabase certificates table not found, using fallback data');
+          // Fallback to static data if Supabase table doesn't exist
+          setCertificates([]);
+        } else if (data) {
+          setCertificates(data);
+        }
+      } catch (err) {
+        console.log('Error fetching certificates:', err);
+        setCertificates([]);
+      }
+      setLoading(false);
+    };
+
+    fetchCertificates();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="min-h-screen px-6 py-20 bg-[#0a192f] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border border-[#00ff9f] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-lg">Loading certificates...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="min-h-screen px-6 py-20 bg-[#0a192f] text-white">
       <div className="max-w-7xl mx-auto">
@@ -162,40 +130,51 @@ export const CertificatesPage = ({ onBack }: { onBack?: () => void }) => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {certificates.map((cert) => (
-            <motion.div
-              key={cert.file}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f]"
-            >
-              <a href={cert.file} target="_blank" rel="noopener noreferrer" className="block">
+        {certificates.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-slate-400 text-lg">Belum ada sertifikat yang ditambahkan.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {certificates.map((cert) => (
+              <motion.div
+                key={cert.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f] cursor-pointer"
+                onClick={() => handleOpenPDF(cert.file)}
+              >
                 <div className="h-44 bg-slate-900 rounded-xl relative mb-4 border border-slate-800 p-3 overflow-hidden">
-                  <Image
-                    src={cert.logoAsset}
-                    alt={`${cert.issuer} logo`}
-                    fill
-                    className="object-contain"
-                    unoptimized
-                  />
+                  {cert.logo_url ? (
+                    <Image
+                      src={cert.logo_url}
+                      alt={`${cert.issuer} logo`}
+                      className="object-contain w-full h-full"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full text-slate-500">
+                      <span className="text-sm">No Logo</span>
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
                 <p className="text-slate-300 text-sm mb-1">Issuer: {cert.issuer}</p>
+                <p className="text-slate-300 text-sm mb-1">Category: {cert.category}</p>
                 {cert.date && <p className="text-slate-500 text-xs mb-3">Date: {cert.date}</p>}
-              </a>
-              <a
-                href={cert.file}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 px-4 py-2 text-sm font-semibold rounded bg-[#00ff9f] text-[#0a192f] hover:bg-[#66ffc0] transition-all"
-              >
-                Lihat PDF
-              </a>
-            </motion.div>
-          ))}
-        </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenPDF(cert.file);
+                  }}
+                  className="inline-block mt-2 px-4 py-2 text-sm font-semibold rounded bg-[#00ff9f] text-[#0a192f] hover:bg-[#66ffc0] transition-all"
+                >
+                  Lihat PDF
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

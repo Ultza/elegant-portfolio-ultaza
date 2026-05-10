@@ -7,6 +7,9 @@ import { Experience } from './components/Experience';
 import { Skills } from './components/Skills';
 import { Projects } from './components/Projects';
 import { Leadership } from './components/Leadership';
+import { News } from './components/News';
+import { NewsDetail } from './components/NewsDetail';
+import { Certificates } from './components/Certificates';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { ProfilePage } from './components/ProfilePage';
@@ -15,13 +18,33 @@ import { AdminPanel } from './components/AdminPanel';
 import { CertificatesPage } from './certificates/page';
 
 export default function App() {
-  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel' | 'certificates'>('portfolio');
+  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel' | 'certificates' | 'news-detail'>('portfolio');
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [newsSlug, setNewsSlug] = React.useState<string>('');
 
   // Fungsi logout admin
   const handleLogout = () => {
     setIsAdmin(false);
     setActivePage('portfolio');
+  };
+
+  // Fungsi untuk membuka detail artikel
+  const handleNewsClick = (slug: string) => {
+    setNewsSlug(slug);
+    setActivePage('news-detail');
+  };
+
+  // Fungsi kembali dari detail artikel
+  const handleBackFromNews = () => {
+    setActivePage('portfolio');
+    setNewsSlug('');
+    // Scroll ke section news setelah kembali
+    setTimeout(() => {
+      const newsSection = document.getElementById('news');
+      if (newsSection) {
+        newsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -48,6 +71,8 @@ export default function App() {
             <Skills />
             <Projects />
             <Leadership />
+            <News onNewsClick={handleNewsClick} />
+            <Certificates onCertificatesClick={() => setActivePage('certificates')} />
             <Contact />
             {/* Tombol login tetap muncul di bawah pada mobile */}
             <div className="flex justify-center mt-8 md:hidden">
@@ -83,6 +108,9 @@ export default function App() {
       )}
       {activePage === 'admin-panel' && isAdmin && (
         <AdminPanel onLogout={handleLogout} />
+      )}
+      {activePage === 'news-detail' && (
+        <NewsDetail slug={newsSlug} onBack={handleBackFromNews} />
       )}
     </div>
   );

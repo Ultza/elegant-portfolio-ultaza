@@ -27,6 +27,7 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick,
     { name: 'Experience', href: '#experience' },
     { name: 'Skills', href: '#skills' },
     { name: 'Projects', href: '#projects' },
+    { name: 'Artikel', href: '#news' },
     { name: 'Certificates', href: '/certificates', onClick: onCertificatesClick },
     { name: 'Contact', href: '#contact' },
   ];
