@@ -70,24 +70,18 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick,
           >
             Personal Profile
           </button>
-          <a
-            href="#contact"
-            className="px-5 py-2 border border-[#00ff9f] text-[#00ff9f] text-sm rounded hover:bg-[#00ff9f]/10 transition-colors"
-          >
-            Hire Me
-          </a>
           {/* Tombol login/logout admin di kanan atas */}
           {!isAdmin ? (
             <button
               onClick={onAdminLoginClick}
-              className="ml-4 px-5 py-2 border border-[#00ff9f] text-[#00ff9f] text-sm rounded hover:bg-[#00ff9f]/10 transition-colors"
+              className="ml-4 px-4 py-2 bg-[#00ff9f] text-[#0a192f] text-sm font-semibold rounded-lg hover:bg-[#00cc7f] transition-colors"
             >
               Admin Login
             </button>
           ) : (
             <button
               onClick={onLogout}
-              className="ml-4 px-5 py-2 border border-red-500 text-red-500 text-sm rounded hover:bg-red-500/10 transition-colors"
+              className="ml-4 px-4 py-2 border border-red-500 text-red-500 text-sm rounded hover:bg-red-500/10 transition-colors"
             >
               Log Out
             </button>
@@ -118,18 +112,48 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick,
                   key={link.name}
                   href={link.href}
                   className="text-lg text-slate-300 hover:text-[#00ff9f]"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    if (link.onClick) {
+                      e.preventDefault();
+                      link.onClick();
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   {link.name}
                 </a>
               ))}
-              <a
-                href="#contact"
-                className="w-full py-3 text-center border border-[#00ff9f] text-[#00ff9f] rounded"
-                onClick={() => setIsMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  onProfileClick?.();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-lg text-slate-300 hover:text-[#00ff9f]"
               >
-                Hire Me
-              </a>
+                Personal Profile
+              </button>
+              {/* Tombol login/logout admin di mobile */}
+              {!isAdmin ? (
+                <button
+                  onClick={() => {
+                    onAdminLoginClick?.();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3 bg-[#00ff9f] text-[#0a192f] font-semibold rounded-lg hover:bg-[#00cc7f] transition-colors"
+                >
+                  Admin Login
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onLogout?.();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3 border border-red-500 text-red-500 rounded hover:bg-red-500/10 transition-colors"
+                >
+                  Log Out
+                </button>
+              )}
             </div>
           </motion.div>
         )}

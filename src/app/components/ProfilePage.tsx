@@ -8,13 +8,23 @@ import {
   Briefcase, 
   Award, 
   Code2, 
-  ArrowLeft 
+  ArrowLeft,
+  Download
 } from "lucide-react";
 
 // Menggunakan path lokal yang sudah Anda konfirmasi ada di folder assets
 import userPortrait from "../../assets/bdf3cd406212a8881b29220053c03e271bedd103.png";
 
 export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
+  const handleDownloadCV = () => {
+    const cvUrl = '/certificates/CV-ULTAZASYAH-NEW.pdf';
+    const link = document.createElement('a');
+    link.href = cvUrl;
+    link.download = 'CV-ULTAZASYAH-NEW.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   const personalInfo = [
     { icon: <Mail size={18} />, label: "Email", value: "ultazanagan111@gmail.com" },
     { icon: <Phone size={18} />, label: "Telepon", value: "082211464363" },
@@ -100,6 +110,17 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
                   </div>
                 </div>
               ))}
+            </div>
+            
+            {/* Download CV Button */}
+            <div className="mt-6 pt-6 border-t border-gray-700">
+              <button
+                onClick={handleDownloadCV}
+                className="w-full flex items-center justify-center gap-3 bg-[#00F5A0] text-[#0A0F1C] py-3 px-4 rounded-lg font-semibold hover:bg-[#00E08B] transition-colors group"
+              >
+                <Download size={18} className="group-hover:scale-110 transition-transform" />
+                Download CV
+              </button>
             </div>
           </div>
         </div>
