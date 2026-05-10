@@ -28,13 +28,16 @@ export const Hero = ({ onProfileClick }: { onProfileClick?: () => void }) => {
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
             Hi, I'm <span className="text-[#00ff9f]">Ul Tazasyah</span>
           </h1>
-          
-          <div className="flex flex-wrap gap-4 mb-8">
-            {["Fullstack Developer", "IT Support", "Mobile Developer"].map((role, i) => (
-              <span key={role} className="flex items-center text-slate-400 text-lg md:text-xl">
-                {i !== 0 && <span className="w-1.5 h-1.5 rounded-full bg-[#00ff9f]/40 mx-3" />}
+
+          <div className="mb-8 space-y-3 pl-2 border-l-2 border-[#00ff9f]">
+            {[
+              "Fullstack Developer",
+              "IT Support",
+              "Mobile Developer"
+            ].map((role) => (
+              <p key={role} className="text-[#00ff9f] text-lg md:text-xl font-medium">
                 {role}
-              </span>
+              </p>
             ))}
           </div>
           
@@ -56,7 +59,7 @@ export const Hero = ({ onProfileClick }: { onProfileClick?: () => void }) => {
               Personal Profile
             </button>
             <div className="flex items-center gap-4 px-2">
-              <a href="https://linkedin.com/in/ul-tazasyah-274a2a392" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#112240] text-slate-400 rounded-lg hover:text-[#00ff9f] hover:bg-[#1d2d50] transition-all border border-slate-800">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#112240] text-slate-400 rounded-lg hover:text-[#00ff9f] hover:bg-[#1d2d50] transition-all border border-slate-800">
                 <Linkedin size={20} />
               </a>
               <a href="mailto:ultazanagan111@gmail.com" className="p-3 bg-[#112240] text-slate-400 rounded-lg hover:text-[#00ff9f] hover:bg-[#1d2d50] transition-all border border-slate-800">
@@ -83,15 +86,19 @@ export const Hero = ({ onProfileClick }: { onProfileClick?: () => void }) => {
               transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
               className="absolute -inset-4 border border-dashed border-[#00ff9f]/20 rounded-full"
             />
+            
+            {/* Glow effect */}
             <div className="absolute -inset-2 bg-gradient-to-tr from-[#00ff9f]/20 to-[#00d4ff]/20 rounded-3xl blur-2xl opacity-50" />
             
-            <div className="relative h-full w-full rounded-3xl overflow-hidden border-2 border-slate-800/50 shadow-2xl">
+            {/* Container Foto dengan Background Merah */}
+            <div className="relative h-full w-full rounded-3xl overflow-hidden border-2 border-slate-800/50 shadow-2xl bg-red-600 group transition-colors duration-700 hover:bg-[#00ff9f]">
               <img
                 src={userPortrait}
                 alt="Ul Tazasyah Portrait"
-                className="w-full h-full object-cover object-top grayscale hover:grayscale-0 transition-all duration-700"
+                className="w-full h-full object-cover object-top grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a192f] via-transparent to-transparent opacity-60" />
+              {/* Overlay gradasi halus agar foto menyatu dengan tema dark */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a192f]/40 via-transparent to-transparent" />
             </div>
           </div>
         </motion.div>
