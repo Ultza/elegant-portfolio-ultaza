@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Code2, Cpu, Laptop } from 'lucide-react';
+import { Menu, X, Cpu } from 'lucide-react';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface NavbarProps {
+  activePage?: string;
+  onNavigate?: (page: string) => void;
   onProfileClick?: () => void;
   onAdminLoginClick?: () => void;
   onCertificatesClick?: () => void;
@@ -10,78 +13,137 @@ interface NavbarProps {
   onLogout?: () => void;
 }
 
-export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick, isAdmin, onLogout }: NavbarProps) => {
+export const Navbar = ({
+  activePage,
+  onNavigate,
+  onProfileClick,
+  onAdminLoginClick,
+  onCertificatesClick,
+  isAdmin,
+  onLogout,
+}: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu on page change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [activePage]);
+
   const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Experience', href: '#experience' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Artikel', href: '#news' },
-    { name: 'Certificates', href: '/certificates', onClick: onCertificatesClick },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Tentang',      page: 'about'          },
+    { name: 'Pengalaman',   page: 'experience'     },
+    { name: 'Keahlian',     page: 'skills'         },
+    { name: 'Proyek',       page: 'projects'       },
+    { name: 'Artikel',      page: 'news'           },
+    { name: 'Learning',     page: 'learning'       },
+    { name: 'Sertifikat',   page: 'certificates'   },
+    { name: 'Kontak',       page: 'contact'        },
   ];
+
+  const handleNav = (page: string) => {
+    onNavigate?.(page);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[#0a192f]/90 backdrop-blur-md py-3 border-b border-[#00ff9f]/10 shadow-lg shadow-[#00ff9f]/5' : 'bg-transparent py-5'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      style={isScrolled ? {
+        background: 'var(--t-nav-blur)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--t-border)',
+        padding: '12px 0',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+      } : {
+        background: 'transparent',
+        padding: '20px 0',
+      }}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <a href="#home" className="flex items-center gap-2 text-xl font-bold tracking-tight text-white group">
-          <div className="w-8 h-8 rounded bg-[#00ff9f]/20 flex items-center justify-center border border-[#00ff9f]/30 group-hover:bg-[#00ff9f]/40 transition-colors">
-            <Cpu className="text-[#00ff9f] w-5 h-5" />
+        {/* Logo */}
+        <button
+          onClick={() => handleNav('home')}
+          className="flex flex-row items-center gap-2 text-xl font-bold tracking-tight group flex-shrink-0"
+        >
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center border transition-colors flex-shrink-0"
+            style={{
+              background: 'var(--t-accent-bg)',
+              borderColor: 'color-mix(in srgb, var(--t-accent) 30%, transparent)',
+            }}
+          >
+            <Cpu className="w-5 h-5" style={{ color: 'var(--t-accent)' }} />
           </div>
-          <span>UL <span className="text-[#00ff9f]">TAZASYAH</span></span>
-        </a>
+          <span className="whitespace-nowrap" style={{ color: 'var(--t-text)' }}>
+            Ul <span style={{ color: 'var(--t-accent)' }}>Tazasyah</span>
+          </span>
+        </button>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-10">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={(e) => {
-                if (link.onClick) {
-                  e.preventDefault();
-                  link.onClick();
-                }
-              }}
-              className="text-sm font-medium text-slate-400 hover:text-[#00ff9f] transition-all relative group"
-            >
-              {link.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#00ff9f] transition-all group-hover:w-full"></span>
-            </a>
-          ))}
+        <div className="hidden md:flex items-center space-x-5">
+          {navLinks.map((link) => {
+            const isActive = activePage === link.page;
+            return (
+              <button
+                key={link.name}
+                onClick={() => handleNav(link.page)}
+                className="text-sm font-medium transition-all relative group"
+                style={{ color: isActive ? 'var(--t-accent)' : 'var(--t-text-muted)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--t-accent)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = isActive ? 'var(--t-accent)' : 'var(--t-text-muted)')}
+              >
+                {link.name}
+                {/* Active underline */}
+                <span
+                  className="absolute -bottom-1 left-0 h-0.5 transition-all"
+                  style={{
+                    background: 'var(--t-accent)',
+                    width: isActive ? '100%' : '0%',
+                  }}
+                />
+                {/* Hover underline */}
+                {!isActive && (
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all"
+                    style={{ background: 'var(--t-accent)' }} />
+                )}
+              </button>
+            );
+          })}
+
           <button
-            onClick={onProfileClick}
-            className="text-sm font-medium text-[#00ff9f] hover:text-[#00ff9f]/80 transition-all cursor-pointer"
+            onClick={() => { onProfileClick?.(); setIsMobileMenuOpen(false); }}
+            className="text-sm font-medium transition-all"
+            style={{ color: activePage === 'profile' ? 'var(--t-accent)' : 'var(--t-accent)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
             Personal Profile
           </button>
-          {/* Tombol login/logout admin di kanan atas */}
+
+          {/* Theme Switcher */}
+          <ThemeSwitcher />
+
+          {/* Admin */}
           {!isAdmin ? (
             <button
-              onClick={onAdminLoginClick}
-              className="ml-4 px-4 py-2 bg-[#00ff9f] text-[#0a192f] text-sm font-semibold rounded-lg hover:bg-[#00cc7f] transition-colors"
+              onClick={() => { onAdminLoginClick?.(); setIsMobileMenuOpen(false); }}
+              className="ml-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+              style={{ background: 'var(--t-accent)', color: 'var(--t-bg)' }}
             >
               Admin Login
             </button>
           ) : (
             <button
-              onClick={onLogout}
-              className="ml-4 px-4 py-2 border border-red-500 text-red-500 text-sm rounded hover:bg-red-500/10 transition-colors"
+              onClick={() => { onLogout?.(); setIsMobileMenuOpen(false); }}
+              className="ml-2 px-4 py-2 text-sm rounded transition-colors border"
+              style={{ borderColor: '#ef4444', color: '#ef4444' }}
             >
               Log Out
             </button>
@@ -90,7 +152,8 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick,
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden text-white hover:text-[#00ff9f] transition-colors"
+          className="md:hidden transition-colors"
+          style={{ color: 'var(--t-text)' }}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -104,52 +167,49 @@ export const Navbar = ({ onProfileClick, onAdminLoginClick, onCertificatesClick,
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="absolute top-full left-0 right-0 bg-[#112240] border-b border-[#00ff9f]/10 overflow-hidden md:hidden"
+            className="absolute top-full left-0 right-0 border-b overflow-hidden md:hidden"
+            style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
           >
             <div className="flex flex-col p-6 space-y-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-lg text-slate-300 hover:text-[#00ff9f]"
-                  onClick={(e) => {
-                    if (link.onClick) {
-                      e.preventDefault();
-                      link.onClick();
-                    }
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = activePage === link.page;
+                return (
+                  <button
+                    key={link.name}
+                    onClick={() => handleNav(link.page)}
+                    className="text-left text-lg transition-colors"
+                    style={{ color: isActive ? 'var(--t-accent)' : 'var(--t-text-muted)' }}
+                  >
+                    {link.name}
+                  </button>
+                );
+              })}
+
               <button
-                onClick={() => {
-                  onProfileClick?.();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-left text-lg text-slate-300 hover:text-[#00ff9f]"
+                onClick={() => { onProfileClick?.(); setIsMobileMenuOpen(false); }}
+                className="text-left text-lg transition-colors"
+                style={{ color: 'var(--t-text-muted)' }}
               >
                 Personal Profile
               </button>
-              {/* Tombol login/logout admin di mobile */}
+
+              <div className="pt-2">
+                <ThemeSwitcher />
+              </div>
+
               {!isAdmin ? (
                 <button
-                  onClick={() => {
-                    onAdminLoginClick?.();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full py-3 bg-[#00ff9f] text-[#0a192f] font-semibold rounded-lg hover:bg-[#00cc7f] transition-colors"
+                  onClick={() => { onAdminLoginClick?.(); setIsMobileMenuOpen(false); }}
+                  className="w-full py-3 font-semibold rounded-lg transition-colors"
+                  style={{ background: 'var(--t-accent)', color: 'var(--t-bg)' }}
                 >
                   Admin Login
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    onLogout?.();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full py-3 border border-red-500 text-red-500 rounded hover:bg-red-500/10 transition-colors"
+                  onClick={() => { onLogout?.(); setIsMobileMenuOpen(false); }}
+                  className="w-full py-3 rounded border transition-colors"
+                  style={{ borderColor: '#ef4444', color: '#ef4444' }}
                 >
                   Log Out
                 </button>

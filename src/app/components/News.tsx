@@ -59,11 +59,11 @@ export const News = ({ onNewsClick }: NewsProps) => {
         viewport={{ once: true }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Latest <span className="text-[#00ff9f]">Articles</span>
+        <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--t-text)' }}>
+          Artikel <span style={{ color: 'var(--t-accent)' }}>Terbaru</span>
         </h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          Insights, tutorials, dan tips seputar development & technology
+        <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--t-text-muted)' }}>
+          Wawasan, tutorial, dan tips seputar pengembangan & teknologi
         </p>
       </motion.div>
 
@@ -73,10 +73,10 @@ export const News = ({ onNewsClick }: NewsProps) => {
         </div>
       ) : fetchError ? (
         <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg max-w-2xl mx-auto text-center">
-          Error loading articles
+          Gagal memuat artikel
         </div>
       ) : articles.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12" style={{ color: 'var(--t-text-muted)' }}>
           <p>Belum ada artikel yang dipublikasikan</p>
         </div>
       ) : (
@@ -88,49 +88,34 @@ export const News = ({ onNewsClick }: NewsProps) => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group bg-[#112240] border border-slate-700 rounded-xl overflow-hidden hover:border-[#00ff9f]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[#00ff9f]/10 cursor-pointer"
+              className="group rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer flex flex-col"
+              style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
               onClick={() => onNewsClick(article.slug)}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--t-accent) 50%, transparent)'; e.currentTarget.style.boxShadow = '0 8px 32px color-mix(in srgb, var(--t-accent) 10%, transparent)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--t-border)'; e.currentTarget.style.boxShadow = 'none'; }}
             >
-              {/* Thumbnail */}
               {article.thumbnail && (
-                <div className="relative overflow-hidden h-48 bg-gradient-to-b from-[#1a2a4f] to-[#0a192f]">
-                  <img
-                    src={article.thumbnail}
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                <div className="relative overflow-hidden" style={{ background: 'var(--t-bg)' }}>
+                  <img src={article.thumbnail} alt={article.title}
+                    className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                 </div>
               )}
 
-              {/* Content */}
-              <div className="p-6 flex flex-col h-full">
-                {/* Meta */}
-                <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
-                  <span>{new Date(article.created_at).toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })}</span>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'var(--t-text-sub)' }}>
+                  <span>{new Date(article.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   <span>•</span>
                   <span>{article.author}</span>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[#00ff9f] transition-colors line-clamp-2">
+                <h3 className="text-xl font-bold mb-3 line-clamp-2 transition-colors" style={{ color: 'var(--t-text)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--t-accent)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--t-text)')}>
                   {article.title}
                 </h3>
-
-                {/* Excerpt */}
-                <p className="text-slate-300 text-sm mb-6 flex-grow line-clamp-3">
-                  {article.excerpt}
-                </p>
-
-                {/* Read More */}
-                <div className="flex items-center gap-2 text-[#00ff9f] hover:text-white transition-colors font-semibold text-sm">
+                <p className="text-sm mb-6 flex-grow line-clamp-3" style={{ color: 'var(--t-text-muted)' }}>{article.excerpt}</p>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color: 'var(--t-accent)' }}>
                   Baca Selengkapnya
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -2,123 +2,175 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import supabase from '../supabaseClient';
-import { Send, Mail, MapPin, Linkedin, Terminal, ArrowRight } from 'lucide-react';
+import { Mail, MapPin, Linkedin, ArrowRight } from 'lucide-react';
 
 export const Contact = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   const onSubmit = async (data: any) => {
     try {
-      const { error } = await supabase.from('contacts').insert([
-        {
-          name: data.name,
-          email: data.email,
-          subject: data.subject,
-          message: data.message,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      const { error } = await supabase.from('contacts').insert([{
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+        created_at: new Date().toISOString(),
+      }]);
       if (error) throw error;
-      toast.success("Message received! I will get back to you soon.", {
-        style: {
-          background: '#112240',
-          color: '#00ff9f',
-          border: '1px solid #00ff9f33'
-        }
-      });
+      toast.success('Pesan terkirim! Saya akan segera menghubungi Anda.');
       reset();
-    } catch (err: any) {
-      toast.error("Failed to send message. Please try again later.");
+    } catch {
+      toast.error('Gagal mengirim pesan. Silakan coba lagi.');
     }
   };
 
   return (
-    <section id="contact" className="py-24 bg-[#0a192f] border-t border-slate-900">
+    <section
+      id="contact"
+      className="py-24 border-t"
+      style={{ background: 'var(--t-bg)', borderColor: 'var(--t-border)' }}
+    >
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+          {/* Left */}
           <div>
-            <h2 className="text-[#00ff9f] font-mono text-sm tracking-widest uppercase mb-4">Contact</h2>
-            <h3 className="text-5xl font-bold text-white mb-8 tracking-tight">Let's connect.</h3>
-            <p className="text-xl text-slate-400 mb-12 max-w-md leading-relaxed">
-              Whether you have a technical project, a GIS data challenge, or just want to say hi, my inbox is always open.
+            <h2 className="font-mono text-sm tracking-widest uppercase mb-4" style={{ color: 'var(--t-accent)' }}>
+              Kontak
+            </h2>
+            <h3 className="text-5xl font-bold mb-8 tracking-tight" style={{ color: 'var(--t-text)' }}>
+              Ayo terhubung.
+            </h3>
+            <p className="text-xl mb-12 max-w-md leading-relaxed" style={{ color: 'var(--t-text-muted)' }}>
+              Baik itu proyek teknis, tantangan data GIS, atau sekadar ingin menyapa, kotak pesan saya selalu terbuka.
             </p>
 
             <div className="space-y-6">
-              <a href="mailto:ultazanagan111@gmail.com" className="group flex items-center gap-4 p-4 rounded-xl bg-[#112240]/50 border border-slate-800 hover:border-[#00ff9f]/30 transition-all">
-                <div className="w-12 h-12 bg-[#0a192f] rounded-lg flex items-center justify-center text-[#00ff9f] border border-[#00ff9f]/20">
+              <a
+                href="mailto:ultazanagan111@gmail.com"
+                className="group flex items-center gap-4 p-4 rounded-xl border transition-all"
+                style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--t-accent) 30%, transparent)')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--t-border)')}
+              >
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center border flex-shrink-0"
+                  style={{
+                    background: 'var(--t-bg)',
+                    color: 'var(--t-accent)',
+                    borderColor: 'color-mix(in srgb, var(--t-accent) 20%, transparent)',
+                  }}
+                >
                   <Mail size={20} />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold">Email Me</p>
-                  <p className="text-lg text-white group-hover:text-[#00ff9f] transition-colors">ultazanagan111@gmail.com</p>
-                </div>
-              </a>
-              
-              <a href="https://linkedin.com/in/ul-tazasyah-274a2a392" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 p-4 rounded-xl bg-[#112240]/50 border border-slate-800 hover:border-[#00d4ff]/30 transition-all">
-                <div className="w-12 h-12 bg-[#0a192f] rounded-lg flex items-center justify-center text-[#00d4ff] border border-[#00d4ff]/20">
-                  <Linkedin size={20} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold">LinkedIn</p>
-                  <p className="text-lg text-white group-hover:text-[#00d4ff] transition-colors">Ul Tazasyah</p>
+                  <p className="text-xs uppercase font-bold" style={{ color: 'var(--t-text-sub)' }}>Kirim Email</p>
+                  <p className="text-lg transition-colors" style={{ color: 'var(--t-text)' }}>
+                    ultazanagan111@gmail.com
+                  </p>
                 </div>
               </a>
 
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-[#112240]/50 border border-slate-800">
-                <div className="w-12 h-12 bg-[#0a192f] rounded-lg flex items-center justify-center text-slate-400 border border-slate-700">
+              <a
+                href="https://linkedin.com/in/ul-tazasyah-274a2a392"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 p-4 rounded-xl border transition-all"
+                style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--t-accent2) 30%, transparent)')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--t-border)')}
+              >
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center border flex-shrink-0"
+                  style={{
+                    background: 'var(--t-bg)',
+                    color: 'var(--t-accent2)',
+                    borderColor: 'color-mix(in srgb, var(--t-accent2) 20%, transparent)',
+                  }}
+                >
+                  <Linkedin size={20} />
+                </div>
+                <div>
+                  <p className="text-xs uppercase font-bold" style={{ color: 'var(--t-text-sub)' }}>LinkedIn</p>
+                  <p className="text-lg" style={{ color: 'var(--t-text)' }}>Ul Tazasyah</p>
+                </div>
+              </a>
+
+              <div
+                className="flex items-center gap-4 p-4 rounded-xl border"
+                style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
+              >
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center border flex-shrink-0"
+                  style={{ background: 'var(--t-bg)', color: 'var(--t-text-sub)', borderColor: 'var(--t-border)' }}
+                >
                   <MapPin size={20} />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold">Location</p>
-                  <p className="text-lg text-white">Nagan Raya, Aceh</p>
+                  <p className="text-xs uppercase font-bold" style={{ color: 'var(--t-text-sub)' }}>Lokasi</p>
+                  <p className="text-lg" style={{ color: 'var(--t-text)' }}>Nagan Raya, Aceh</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#112240] p-8 md:p-12 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ff9f]/5 blur-[100px]" />
+          {/* Right — Form */}
+          <div
+            className="p-8 md:p-12 rounded-3xl border shadow-2xl relative overflow-hidden"
+            style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
+          >
+            <div
+              className="absolute top-0 right-0 w-64 h-64 blur-[100px] opacity-5"
+              style={{ background: 'var(--t-accent)' }}
+            />
             <form onSubmit={handleSubmit(onSubmit)} className="relative z-10 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-[#00ff9f] uppercase tracking-wider">Your Name</label>
-                  <input
-                    {...register("name", { required: true })}
-                    className="w-full bg-[#0a192f] border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00ff9f] transition-all"
-                    placeholder="John Doe"
-                  />
+                  <label className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--t-accent)' }}>Nama Anda</label>
+                  <input {...register('name', { required: true })} className="w-full border rounded-lg px-4 py-3 focus:outline-none transition-all"
+                    style={{ background: 'var(--t-bg-input)', borderColor: errors.name ? '#ef4444' : 'var(--t-border)', color: 'var(--t-text)' }}
+                    placeholder="Budi Santoso"
+                    onFocus={(e) => (e.target.style.borderColor = 'var(--t-accent)')}
+                    onBlur={(e) => (e.target.style.borderColor = errors.name ? '#ef4444' : 'var(--t-border)')} />
+                  {errors.name && <p className="text-red-500 text-xs">Nama wajib diisi</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-[#00ff9f] uppercase tracking-wider">Email Address</label>
-                  <input
-                    {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
-                    className="w-full bg-[#0a192f] border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00ff9f] transition-all"
-                    placeholder="john@example.com"
-                  />
+                  <label className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--t-accent)' }}>Alamat Email</label>
+                  <input {...register('email', { required: true, pattern: /^\S+@\S+$/i })} className="w-full border rounded-lg px-4 py-3 focus:outline-none transition-all"
+                    style={{ background: 'var(--t-bg-input)', borderColor: errors.email ? '#ef4444' : 'var(--t-border)', color: 'var(--t-text)' }}
+                    placeholder="budi@contoh.com"
+                    onFocus={(e) => (e.target.style.borderColor = 'var(--t-accent)')}
+                    onBlur={(e) => (e.target.style.borderColor = errors.email ? '#ef4444' : 'var(--t-border)')} />
+                  {errors.email && <p className="text-red-500 text-xs">Email yang valid wajib diisi</p>}
                 </div>
               </div>
+
               <div className="space-y-2">
-                <label className="text-xs font-mono text-[#00ff9f] uppercase tracking-wider">Subject</label>
-                <input
-                  {...register("subject")}
-                  className="w-full bg-[#0a192f] border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00ff9f] transition-all"
-                  placeholder="Inquiry about Project"
-                />
+                <label className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--t-accent)' }}>Subjek</label>
+                <input {...register('subject')} className="w-full border rounded-lg px-4 py-3 focus:outline-none transition-all"
+                  style={{ background: 'var(--t-bg-input)', borderColor: 'var(--t-border)', color: 'var(--t-text)' }}
+                  placeholder="Pertanyaan tentang Proyek"
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--t-accent)')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--t-border)')} />
               </div>
+
               <div className="space-y-2">
-                <label className="text-xs font-mono text-[#00ff9f] uppercase tracking-wider">Message</label>
-                <textarea
-                  {...register("message", { required: true })}
-                  rows={5}
-                  className="w-full bg-[#0a192f] border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00ff9f] transition-all resize-none"
-                  placeholder="How can I help you today?"
-                />
+                <label className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--t-accent)' }}>Pesan</label>
+                <textarea {...register('message', { required: true })} rows={5} className="w-full border rounded-lg px-4 py-3 focus:outline-none transition-all resize-none"
+                  style={{ background: 'var(--t-bg-input)', borderColor: errors.message ? '#ef4444' : 'var(--t-border)', color: 'var(--t-text)' }}
+                  placeholder="Apa yang bisa saya bantu?"
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--t-accent)')}
+                  onBlur={(e) => (e.target.style.borderColor = errors.message ? '#ef4444' : 'var(--t-border)')} />
+                {errors.message && <p className="text-red-500 text-xs">Pesan wajib diisi</p>}
               </div>
+
               <button
                 type="submit"
-                className="w-full bg-[#00ff9f] text-[#0a192f] py-4 rounded-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-[#00e08b] transition-all shadow-lg shadow-[#00ff9f]/20 group"
+                className="w-full py-4 rounded-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg group"
+                style={{ background: 'var(--t-accent)', color: 'var(--t-bg)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
-                Execute Send <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                Kirim Pesan <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
           </div>

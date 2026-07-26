@@ -179,3 +179,98 @@
     line-height: 1.5;
   }
 }
+
+/* ============================================
+   PORTFOLIO THEME VARIABLES
+   ============================================ */
+
+/* Theme: Dark (default — navy hacker) */
+[data-theme="dark"] {
+  --t-bg:         #0a192f;
+  --t-bg-card:    #112240;
+  --t-bg-deep:    #020c1b;
+  --t-bg-input:   #0a192f;
+  --t-border:     #1e3a5f;
+  --t-border-sub: rgba(30,58,95,0.5);
+  --t-text:       #ffffff;
+  --t-text-muted: #8892b0;
+  --t-text-sub:   #64748b;
+  --t-accent:     #00ff9f;
+  --t-accent2:    #00d4ff;
+  --t-accent-bg:  rgba(0,255,159,0.1);
+  --t-tag-bg:     #0a192f;
+  --t-tag-text:   #64748b;
+  --t-dot-bg:     #0a192f;
+  --t-nav-blur:   rgba(10,25,47,0.9);
+  --t-footer-bg:  #020c1b;
+}
+
+/* Theme: Light (clean white) */
+[data-theme="light"] {
+  --t-bg:         #f8fafc;
+  --t-bg-card:    #ffffff;
+  --t-bg-deep:    #e2e8f0;
+  --t-bg-input:   #f1f5f9;
+  --t-border:     #cbd5e1;
+  --t-border-sub: rgba(203,213,225,0.7);
+  --t-text:       #0f172a;
+  --t-text-muted: #475569;
+  --t-text-sub:   #94a3b8;
+  --t-accent:     #059669;
+  --t-accent2:    #0284c7;
+  --t-accent-bg:  rgba(5,150,105,0.1);
+  --t-tag-bg:     #f1f5f9;
+  --t-tag-text:   #475569;
+  --t-dot-bg:     #f8fafc;
+  --t-nav-blur:   rgba(248,250,252,0.92);
+  --t-footer-bg:  #e2e8f0;
+}
+
+/* Theme: Midnight (deep purple) */
+[data-theme="midnight"] {
+  --t-bg:         #0d0d1a;
+  --t-bg-card:    #16162a;
+  --t-bg-deep:    #050510;
+  --t-bg-input:   #0d0d1a;
+  --t-border:     #2d2d5e;
+  --t-border-sub: rgba(45,45,94,0.5);
+  --t-text:       #e2e8f0;
+  --t-text-muted: #a5b4fc;
+  --t-text-sub:   #6366f1;
+  --t-accent:     #a78bfa;
+  --t-accent2:    #f472b6;
+  --t-accent-bg:  rgba(167,139,250,0.1);
+  --t-tag-bg:     #0d0d1a;
+  --t-tag-text:   #6366f1;
+  --t-dot-bg:     #0d0d1a;
+  --t-nav-blur:   rgba(13,13,26,0.92);
+  --t-footer-bg:  #050510;
+}
+
+/* Theme: Forest (earthy green) */
+[data-theme="forest"] {
+  --t-bg:         #0a1a0f;
+  --t-bg-card:    #122018;
+  --t-bg-deep:    #040d07;
+  --t-bg-input:   #0a1a0f;
+  --t-border:     #1e4d2b;
+  --t-border-sub: rgba(30,77,43,0.5);
+  --t-text:       #ecfdf5;
+  --t-text-muted: #86efac;
+  --t-text-sub:   #4ade80;
+  --t-accent:     #4ade80;
+  --t-accent2:    #facc15;
+  --t-accent-bg:  rgba(74,222,128,0.1);
+  --t-tag-bg:     #0a1a0f;
+  --t-tag-text:   #4ade80;
+  --t-dot-bg:     #0a1a0f;
+  --t-nav-blur:   rgba(10,26,15,0.92);
+  --t-footer-bg:  #040d07;
+}
+
+/* Smooth transition on theme change */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}

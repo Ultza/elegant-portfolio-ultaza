@@ -1,5 +1,6 @@
 import React from 'react';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
@@ -16,102 +17,133 @@ import { ProfilePage } from './components/ProfilePage';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminPanel } from './components/AdminPanel';
 import { CertificatesPage } from './certificates/page';
+import { LearningPage } from './components/LearningPage';
+import { LearningDetail } from './components/LearningDetail';
+
+export type SectionPage =
+  | 'home'
+  | 'about'
+  | 'experience'
+  | 'skills'
+  | 'projects'
+  | 'leadership'
+  | 'news'
+  | 'certificates'
+  | 'contact'
+  | 'profile'
+  | 'admin-login'
+  | 'admin-panel'
+  | 'certificates-full'
+  | 'news-detail'
+  | 'learning'
+  | 'learning-detail';
 
 export default function App() {
-  const [activePage, setActivePage] = React.useState<'portfolio' | 'profile' | 'admin-login' | 'admin-panel' | 'certificates' | 'news-detail'>('portfolio');
+  const [activePage, setActivePage] = React.useState<SectionPage>('home');
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [newsSlug, setNewsSlug] = React.useState<string>('');
+  const [learningSlug, setLearningSlug] = React.useState<string>('');
 
-  // Fungsi logout admin
   const handleLogout = () => {
     setIsAdmin(false);
-    setActivePage('portfolio');
+    setActivePage('home');
   };
 
-  // Fungsi untuk membuka detail artikel
   const handleNewsClick = (slug: string) => {
     setNewsSlug(slug);
     setActivePage('news-detail');
   };
 
-  // Fungsi kembali dari detail artikel
-  const handleBackFromNews = () => {
-    setActivePage('portfolio');
-    setNewsSlug('');
-    // Scroll ke section news setelah kembali
-    setTimeout(() => {
-      const newsSection = document.getElementById('news');
-      if (newsSection) {
-        newsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+  const handleTutorialClick = (slug: string) => {
+    setLearningSlug(slug);
+    setActivePage('learning-detail');
+  };
+
+  // Pages yang tampilkan Navbar + Footer
+  const withNav: SectionPage[] = [
+    'home', 'about', 'experience', 'skills', 'projects',
+    'leadership', 'news', 'certificates', 'contact', 'certificates-full',
+    'learning', 'learning-detail',
+  ];
+
+  const showNavFooter = withNav.includes(activePage);
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'home':
+        return <Hero onProfileClick={() => setActivePage('profile')} />;
+      case 'about':
+        return <About />;
+      case 'experience':
+        return <Experience />;
+      case 'skills':
+        return <Skills />;
+      case 'projects':
+        return <Projects />;
+      case 'leadership':
+        return <Leadership />;
+      case 'news':
+        return <News onNewsClick={handleNewsClick} />;
+      case 'certificates':
+        return <Certificates onCertificatesClick={() => setActivePage('certificates-full')} />;
+      case 'contact':
+        return <Contact />;
+      case 'certificates-full':
+        return <CertificatesPage onBack={() => setActivePage('certificates')} />;
+      case 'learning':
+        return <LearningPage onTutorialClick={handleTutorialClick} />;
+      case 'learning-detail':
+        return (
+          <LearningDetail
+            slug={learningSlug}
+            onBack={() => setActivePage('learning')}
+            onTutorialClick={handleTutorialClick}
+          />
+        );
+      case 'profile':
+        return <ProfilePage onBack={() => setActivePage('home')} />;
+      case 'admin-login':
+        return <AdminLogin onLogin={() => { setIsAdmin(true); setActivePage('admin-panel'); }} />;
+      case 'admin-panel':
+        return isAdmin ? <AdminPanel onLogout={handleLogout} /> : null;
+      case 'news-detail':
+        return (
+          <NewsDetail
+            slug={newsSlug}
+            onBack={() => setActivePage('news')}
+          />
+        );
+      default:
+        return <Hero onProfileClick={() => setActivePage('profile')} />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a192f] font-sans selection:bg-[#00ff9f]/30 selection:text-[#00ff9f] scroll-smooth">
-      <Toaster 
-        position="top-right" 
-        expand={true} 
-        richColors 
-        theme="dark"
-      />
-      {activePage === 'portfolio' && (
-        <>
-          <Navbar 
+    <ThemeProvider>
+      <div
+        className="min-h-screen font-sans"
+        style={{ background: 'var(--t-bg)', color: 'var(--t-text)' }}
+      >
+        <Toaster position="top-right" expand={true} richColors theme="dark" />
+
+        {showNavFooter && (
+          <Navbar
+            activePage={activePage}
+            onNavigate={(page) => setActivePage(page as SectionPage)}
             onProfileClick={() => setActivePage('profile')}
             onCertificatesClick={() => setActivePage('certificates')}
             onAdminLoginClick={() => setActivePage('admin-login')}
             isAdmin={isAdmin}
             onLogout={handleLogout}
           />
-          <main>
-            <Hero onProfileClick={() => setActivePage('profile')} />
-            <About />
-            <Experience />
-            <Skills />
-            <Projects />
-            <Leadership />
-            <News onNewsClick={handleNewsClick} />
-            <Certificates onCertificatesClick={() => setActivePage('certificates')} />
-            <Contact />
-            {/* Tombol login tetap muncul di bawah pada mobile */}
-            <div className="flex justify-center mt-8 md:hidden">
-              <button
-                className="bg-[#00ff9f] text-[#0a192f] px-4 py-2 rounded font-bold hover:bg-[#00e08b] transition-all"
-                onClick={() => setActivePage('admin-login')}
-              >
-                Admin Login
-              </button>
-            </div>
-          </main>
-          <Footer />
-        </>
-      )}
-      {activePage === 'profile' && (
-        <ProfilePage onBack={() => setActivePage('portfolio')} />
-      )}
-      {activePage === 'certificates' && (
-        <>
-          <Navbar 
-            onProfileClick={() => setActivePage('profile')}
-            onCertificatesClick={() => setActivePage('certificates')}
-            onAdminLoginClick={() => setActivePage('admin-login')}
-            isAdmin={isAdmin}
-            onLogout={handleLogout}
-          />
-          <CertificatesPage onBack={() => setActivePage('portfolio')} />
-          <Footer />
-        </>
-      )}
-      {activePage === 'admin-login' && (
-        <AdminLogin onLogin={() => { setIsAdmin(true); setActivePage('admin-panel'); }} />
-      )}
-      {activePage === 'admin-panel' && isAdmin && (
-        <AdminPanel onLogout={handleLogout} />
-      )}
-      {activePage === 'news-detail' && (
-        <NewsDetail slug={newsSlug} onBack={handleBackFromNews} />
-      )}
-    </div>
+        )}
+
+        <main className={showNavFooter ? 'pt-20 min-h-screen' : ''}>
+          {renderPage()}
+        </main>
+
+        {showNavFooter && <Footer />}
+      </div>
+    </ThemeProvider>
   );
 }

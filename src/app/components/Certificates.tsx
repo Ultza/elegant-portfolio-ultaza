@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { Award, ExternalLink } from 'lucide-react';
 import supabase from '../supabaseClient';
 
 interface Certificate {
@@ -29,169 +30,182 @@ export const Certificates = ({ onCertificatesClick }: CertificatesProps) => {
           .from('certificates')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(6); // Show only 6 certificates on homepage
-
-        if (error) {
-          console.log('Supabase certificates table not found');
-          setCertificates([]);
-        } else if (data) {
-          setCertificates(data);
-        }
-      } catch (err) {
-        console.log('Error fetching certificates:', err);
-        setCertificates([]);
-      }
+          .limit(6);
+        if (error) { setCertificates([]); }
+        else if (data) { setCertificates(data); }
+      } catch { setCertificates([]); }
       setLoading(false);
     };
-
     fetchCertificates();
   }, []);
 
-  // Sanitize file path for display and opening
   const sanitizeFilePath = (filePath: string): string => {
     if (!filePath) return '';
-
-    // If it's already a web path starting with /certificates/, return as is
-    if (filePath.startsWith('/certificates/')) {
-      // Handle double slashes
+    if (filePath.startsWith('/certificates/'))
       return filePath.replace(/\/certificates\/+/, '/certificates/');
-    }
-
-    // If it's a file:// URL, extract filename and convert to web path
     if (filePath.startsWith('file:///')) {
       try {
         const url = new URL(filePath);
         const pathname = decodeURIComponent(url.pathname);
         const filename = pathname.split('\\').pop() || pathname.split('/').pop() || '';
         return `/certificates/${filename}`;
-      } catch (error) {
-        console.error('Error parsing file URL:', error);
-        return '';
-      }
+      } catch { return ''; }
     }
-
-    // If it's a Windows path, extract filename
     if (filePath.includes('\\') || filePath.includes('/')) {
       const filename = filePath.split('\\').pop() || filePath.split('/').pop() || '';
-      if (filename) {
-        return `/certificates/${filename}`;
-      }
+      if (filename) return `/certificates/${filename}`;
     }
-
-    // If it's just a filename, add certificates path
-    if (!filePath.includes('/') && !filePath.includes('\\')) {
+    if (!filePath.includes('/') && !filePath.includes('\\'))
       return `/certificates/${filePath}`;
-    }
-
     return '';
   };
 
-  // Handle opening PDF
   const handleOpenPDF = (filePath: string) => {
     const pdfUrl = sanitizeFilePath(filePath);
-    console.log('Original file path:', filePath);
-    console.log('Sanitized PDF URL:', pdfUrl);
-
-    if (!pdfUrl) {
-      alert('File sertifikat belum tersedia atau path tidak valid');
-      return;
-    }
-
-    try {
-      // Check if the file exists by trying to fetch it
-      fetch(pdfUrl, { method: 'HEAD' })
-        .then(response => {
-          if (response.ok) {
-            window.open(pdfUrl, '_blank');
-          } else {
-            console.error('File not found:', pdfUrl);
-            alert('File sertifikat tidak ditemukan. Pastikan file sudah diupload dengan benar.');
-          }
-        })
-        .catch(error => {
-          console.error('Error checking file:', error);
-          alert('Terjadi kesalahan saat membuka sertifikat. Silakan coba lagi.');
-        });
-    } catch (error) {
-      console.error('Error opening PDF:', error);
-      alert('Terjadi kesalahan saat membuka sertifikat.');
-    }
+    if (!pdfUrl) { alert('File sertifikat belum tersedia atau path tidak valid'); return; }
+    fetch(pdfUrl, { method: 'HEAD' })
+      .then(res => {
+        if (res.ok) window.open(pdfUrl, '_blank');
+        else alert('File sertifikat tidak ditemukan.');
+      })
+      .catch(() => alert('Terjadi kesalahan saat membuka sertifikat.'));
   };
 
   if (loading) {
     return (
       <section id="certificates" className="py-20 px-6 max-w-7xl mx-auto">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border border-[#00ff9f] border-t-transparent mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading certificates...</p>
+          <div
+            className="animate-spin rounded-full h-8 w-8 border border-t-transparent mx-auto mb-4"
+            style={{ borderColor: 'var(--t-accent)' }}
+          />
+          <p style={{ color: 'var(--t-text-muted)' }}>Memuat sertifikat...</p>
         </div>
       </section>
     );
   }
 
-  if (certificates.length === 0) {
-    return null; // Don't show section if no certificates
-  }
+  if (certificates.length === 0) return null;
 
   return (
-    <section id="certificates" className="py-20 px-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          My <span className="text-[#00ff9f]">Certificates</span>
-        </h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
-          Professional certifications and achievements in technology and development.
-        </p>
-        <button
-          onClick={onCertificatesClick}
-          className="px-6 py-3 bg-[#00ff9f] text-[#0a192f] font-bold rounded-lg hover:bg-[#00cc7f] transition-colors"
+    <section id="certificates" className="py-24" style={{ background: 'var(--t-bg)' }}>
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="flex flex-col items-center mb-16 text-center"
         >
-          View All Certificates
-        </button>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {certificates.map((cert, index) => (
-          <motion.div
-            key={cert.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            viewport={{ once: true }}
-            className="group bg-[#112240] rounded-2xl border border-[#27465f] p-5 shadow-lg hover:border-[#00ff9f] cursor-pointer transition-all duration-300"
-            onClick={() => handleOpenPDF(cert.file)}
+          <h2
+            className="font-mono text-sm tracking-widest uppercase mb-4 flex items-center gap-2"
+            style={{ color: 'var(--t-accent)' }}
           >
-            <div className="h-32 bg-slate-900 rounded-xl relative mb-4 border border-slate-800 p-3 overflow-hidden">
-              {cert.logo_url ? (
-                <img
-                  src={cert.logo_url}
-                  alt={`${cert.issuer} logo`}
-                  className="object-contain w-full h-full"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full text-slate-500">
-                  <span className="text-sm">Certificate</span>
+            <span className="w-10 h-[1px]" style={{ background: 'var(--t-accent)' }} />
+            Pencapaian
+            <span className="w-10 h-[1px]" style={{ background: 'var(--t-accent)' }} />
+          </h2>
+          <h3 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{ color: 'var(--t-text)' }}>
+            Sertifikat <span style={{ color: 'var(--t-accent)' }}>Saya</span>
+          </h3>
+          <p className="text-lg max-w-2xl mx-auto mb-8" style={{ color: 'var(--t-text-muted)' }}>
+            Sertifikasi profesional dan pencapaian di bidang teknologi dan pengembangan.
+          </p>
+          <button onClick={onCertificatesClick}
+            className="px-6 py-3 font-bold rounded-lg transition-all hover:-translate-y-0.5"
+            style={{ background: 'var(--t-accent)', color: 'var(--t-bg)', boxShadow: '0 4px 16px color-mix(in srgb, var(--t-accent) 25%, transparent)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.88')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}>
+            Lihat Semua Sertifikat
+          </button>
+        </motion.div>
+
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {certificates.map((cert, index) => (
+            <motion.div
+              key={cert.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="group rounded-2xl border cursor-pointer transition-all duration-300 overflow-hidden flex flex-col"
+              style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)' }}
+              onClick={() => handleOpenPDF(cert.file)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--t-accent) 50%, transparent)';
+                e.currentTarget.style.boxShadow = '0 8px 32px color-mix(in srgb, var(--t-accent) 10%, transparent)';
+                e.currentTarget.style.transform = 'translateY(-3px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--t-border)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {/* Logo area */}
+              <div
+                className="h-32 relative flex items-center justify-center p-4 border-b"
+                style={{ background: 'var(--t-bg)', borderColor: 'var(--t-border)' }}
+              >
+                {cert.logo_url ? (
+                  <img
+                    src={cert.logo_url}
+                    alt={`${cert.issuer} logo`}
+                    className="object-contain w-full h-full"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Award size={32} style={{ color: 'var(--t-accent)', opacity: 0.5 }} />
+                    <span className="text-xs font-mono" style={{ color: 'var(--t-text-sub)' }}>Sertifikat</span>
+                  </div>
+                )}
+                {/* Category badge */}
+                {cert.category && (
+                  <span
+                    className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                    style={{
+                      background: 'var(--t-accent-bg)',
+                      color: 'var(--t-accent)',
+                      border: '1px solid color-mix(in srgb, var(--t-accent) 20%, transparent)',
+                    }}
+                  >
+                    {cert.category}
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-grow">
+                <h3
+                  className="text-base font-bold mb-2 line-clamp-2 leading-snug"
+                  style={{ color: 'var(--t-text)' }}
+                >
+                  {cert.title}
+                </h3>
+                <p className="text-sm mb-1" style={{ color: 'var(--t-accent)' }}>
+                  {cert.issuer}
+                </p>
+                {cert.date && (
+                  <p className="text-xs mb-3" style={{ color: 'var(--t-text-sub)' }}>
+                    {cert.date}
+                  </p>
+                )}
+
+                {/* View link */}
+                <div
+                  className="mt-auto flex items-center gap-1.5 text-sm font-semibold transition-colors"
+                  style={{ color: 'var(--t-accent)' }}
+                >
+                  <ExternalLink size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                  Lihat Sertifikat
                 </div>
-              )}
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">{cert.title}</h3>
-            <p className="text-slate-300 text-sm mb-1">Issuer: {cert.issuer}</p>
-            <p className="text-slate-300 text-sm mb-1">Category: {cert.category}</p>
-            {cert.date && <p className="text-slate-500 text-xs mb-3">Date: {cert.date}</p>}
-            <div className="text-[#00ff9f] text-sm font-semibold group-hover:text-white transition-colors">
-              Click to view PDF →
-            </div>
-          </motion.div>
-        ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -7,6 +7,15 @@
     <meta name="google-site-verification" content="qrHYklkdoZO5IWSXHuRHy5G1oGe6VqY2G2zV3fOXskw" />
     
     <title>Ul Tazasyah | Fullstack Developer & GIS Specialist</title>
+
+    <!-- Apply saved theme before React mounts to prevent flash -->
+    <script>
+      (function() {
+        var saved = localStorage.getItem('portfolio-theme');
+        var valid = ['dark','light','midnight','forest'];
+        document.documentElement.setAttribute('data-theme', valid.includes(saved) ? saved : 'dark');
+      })();
+    </script>
   </head>
 
   <body>

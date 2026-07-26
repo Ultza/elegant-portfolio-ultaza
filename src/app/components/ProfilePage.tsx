@@ -1,30 +1,28 @@
 import React from "react";
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Linkedin, 
-  GraduationCap, 
-  Briefcase, 
-  Award, 
-  Code2, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  GraduationCap,
+  Briefcase,
+  Award,
+  Code2,
   ArrowLeft,
-  Download
+  Download,
 } from "lucide-react";
-
-// Menggunakan path lokal yang sudah Anda konfirmasi ada di folder assets
 import userPortrait from "../../assets/bdf3cd406212a8881b29220053c03e271bedd103.png";
 
 export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
   const handleDownloadCV = () => {
-    const cvUrl = '/certificates/CV-ULTAZASYAH-NEW.pdf';
-    const link = document.createElement('a');
-    link.href = cvUrl;
-    link.download = 'CV-ULTAZASYAH-NEW.pdf';
+    const link = document.createElement("a");
+    link.href = "/certificates/CV-UL TAZASYAH.pdf";
+    link.download = "CV-UL TAZASYAH.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
   const personalInfo = [
     { icon: <Mail size={18} />, label: "Email", value: "ultazanagan111@gmail.com" },
     { icon: <Phone size={18} />, label: "Telepon", value: "082211464363" },
@@ -37,14 +35,14 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
       school: "Universitas Teuku Umar",
       degree: "S1 Teknologi Informasi (IPK: 3.29/4.00)",
       period: "2021 - 2025",
-      details: "Fokus pada Analisis Sistem, Pemrograman Berorientasi Objek, dan Keamanan Jaringan."
+      details: "Fokus pada Analisis Sistem, Pemrograman Berorientasi Objek, dan Keamanan Jaringan.",
     },
     {
       school: "SMA Negeri 3 Seunagan",
       degree: "Ilmu Pengetahuan Sosial",
       period: "2018 - 2021",
-      details: "Peringkat 1 (Kelas 11-12) dan menjabat sebagai Ketua OSIS."
-    }
+      details: "Peringkat 1 (Kelas 11-12) dan menjabat sebagai Ketua OSIS.",
+    },
   ];
 
   const experience = [
@@ -52,71 +50,96 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
       role: "Kerja Praktek (IT Support & TIK)",
       company: "Diskominsa Aceh Barat",
       period: "Des 2024 - Jan 2025",
-      description: "Berkontribusi dalam bidang Teknologi Informasi dan Komunikasi serta penambahan fitur berita pada website resmi."
+      description: "Berkontribusi dalam bidang Teknologi Informasi dan Komunikasi serta penambahan fitur berita pada website resmi.",
     },
     {
       role: "Manager GIS dan Data",
       company: "Yayasan APEL Green Aceh",
       period: "Des 2022 - Nov 2024",
-      description: "Mengelola data geospasial dan informasi lingkungan untuk pemantauan kawasan lindung."
+      description: "Mengelola data geospasial dan informasi lingkungan untuk pemantauan kawasan lindung.",
     },
     {
       role: "Enumerator Proklim",
       company: "DLHK / KLHK",
       period: "Feb 2024 - Apr 2024",
-      description: "Melakukan pendataan untuk Program Kampung Iklim."
-    }
+      description: "Melakukan pendataan untuk Program Kampung Iklim.",
+    },
   ];
 
   const skills = {
     languages: ["HTML", "CSS", "PHP", "JavaScript", "Kotlin", "Python", "C++"],
     frameworks: ["Laravel", "CodeIgniter (CI3/CI4)", "React"],
-    tools: ["ArcMap", "Google Earth", "VS Code", "MySQL", "Android Studio", "Cisco", "Burp Suite"]
+    tools: ["ArcMap", "Google Earth", "VS Code", "MySQL", "Android Studio", "Cisco", "Burp Suite"],
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F1C] text-white p-4 md:p-8 font-sans">
-      {/* Header & Back Button */}
-      <button 
+    <div
+      className="min-h-screen p-4 md:p-8 font-sans"
+      style={{ background: "var(--t-bg)", color: "var(--t-text)" }}
+    >
+      {/* Back button */}
+      <button
         onClick={onBack}
-        className="flex items-center gap-2 text-gray-400 hover:text-[#00F5A0] transition-colors mb-8"
+        className="flex items-center gap-2 text-sm font-medium mb-8 transition-colors"
+        style={{ color: "var(--t-text-muted)" }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-accent)")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}
       >
         <ArrowLeft size={20} /> Kembali ke Portofolio
       </button>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Profile Card */}
+
+        {/* ── Left: Profile Card ── */}
         <div className="lg:col-span-1">
-          <div className="bg-[#161B2D] rounded-2xl p-6 border border-gray-800 sticky top-8">
+          <div
+            className="rounded-2xl p-6 border sticky top-8"
+            style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+          >
+            {/* Avatar */}
             <div className="relative w-48 h-48 mx-auto mb-6">
-              <div className="absolute inset-0 bg-[#00F5A0] rounded-full blur-2xl opacity-20 animate-pulse"></div>
-              <img 
-                src={userPortrait} 
-                alt="Ul Tazasyah" 
-                className="relative w-full h-full object-cover object-top rounded-full border-2 border-[#00F5A0]"
+              <div
+                className="absolute inset-0 rounded-full blur-2xl opacity-20 animate-pulse"
+                style={{ background: "var(--t-accent)" }}
+              />
+              <img
+                src={userPortrait}
+                alt="Ul Tazasyah"
+                className="relative w-full h-full object-cover object-top rounded-full border-2"
+                style={{ borderColor: "var(--t-accent)" }}
               />
             </div>
-            
-            <h1 className="text-2xl font-bold text-center mb-2">Ul Tazasyah</h1>
-            <p className="text-[#00F5A0] text-center mb-6 font-medium">Fullstack Developer & GIS Specialist</p>
-            
+
+            <h1 className="text-2xl font-bold text-center mb-1" style={{ color: "var(--t-text)" }}>
+              Ul Tazasyah
+            </h1>
+            <p className="text-center mb-6 font-medium text-sm" style={{ color: "var(--t-accent)" }}>
+              Fullstack Developer & GIS Specialist
+            </p>
+
+            {/* Contact info */}
             <div className="space-y-4">
-              {personalInfo.map((info, index) => (
-                <div key={index} className="flex items-center gap-3 text-gray-300 text-sm">
-                  <span className="text-[#00F5A0]">{info.icon}</span>
+              {personalInfo.map((info, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm">
+                  <span style={{ color: "var(--t-accent)" }}>{info.icon}</span>
                   <div>
-                    <p className="text-gray-500 text-xs uppercase">{info.label}</p>
-                    <p>{info.value}</p>
+                    <p className="text-[10px] uppercase font-bold" style={{ color: "var(--t-text-sub)" }}>
+                      {info.label}
+                    </p>
+                    <p style={{ color: "var(--t-text-muted)" }}>{info.value}</p>
                   </div>
                 </div>
               ))}
             </div>
-            
-            {/* Download CV Button */}
-            <div className="mt-6 pt-6 border-t border-gray-700">
+
+            {/* Download CV */}
+            <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--t-border)" }}>
               <button
                 onClick={handleDownloadCV}
-                className="w-full flex items-center justify-center gap-3 bg-[#00F5A0] text-[#0A0F1C] py-3 px-4 rounded-lg font-semibold hover:bg-[#00E08B] transition-colors group"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-semibold transition-all group"
+                style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 <Download size={18} className="group-hover:scale-110 transition-transform" />
                 Download CV
@@ -125,32 +148,54 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
           </div>
         </div>
 
-        {/* Right Column: Details */}
+        {/* ── Right: Details ── */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Summary */}
-          <section className="bg-[#161B2D] rounded-2xl p-6 border border-gray-800">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Award className="text-[#00F5A0]" size={22} /> Profil Profesional
+
+          {/* Professional Summary */}
+          <section
+            className="rounded-2xl p-6 border"
+            style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+              <Award style={{ color: "var(--t-accent)" }} size={22} /> Profil Profesional
             </h2>
-            <p className="text-gray-400 leading-relaxed text-sm md:text-base">
-              Lulusan S1 Teknologi Informasi dari Universitas Teuku Umar dengan IPK 3.29[cite: 3, 12, 14]. Memiliki pengalaman kuat di bidang TIK melalui kerja praktek di Diskominsa Aceh Barat serta keahlian khusus dalam pengelolaan data GIS[cite: 4, 5, 23, 25]. Berdedikasi tinggi, proaktif, dan siap memberikan kontribusi positif dalam pengembangan perangkat lunak maupun dukungan IT[cite: 6].
+            <p className="leading-relaxed text-sm md:text-base" style={{ color: "var(--t-text-muted)" }}>
+              Lulusan S1 Teknologi Informasi dari Universitas Teuku Umar dengan IPK 3.29. Memiliki
+              pengalaman kuat di bidang TIK melalui kerja praktek di Diskominsa Aceh Barat serta keahlian
+              khusus dalam pengelolaan data GIS. Berdedikasi tinggi, proaktif, dan siap memberikan
+              kontribusi positif dalam pengembangan perangkat lunak maupun dukungan IT.
             </p>
           </section>
 
           {/* Education */}
           <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <GraduationCap className="text-[#00F5A0]" size={22} /> Pendidikan
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+              <GraduationCap style={{ color: "var(--t-accent)" }} size={22} /> Pendidikan
             </h2>
             <div className="space-y-4">
-              {education.map((edu, index) => (
-                <div key={index} className="bg-[#161B2D] p-5 rounded-xl border border-gray-800 hover:border-[#00F5A0]/50 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-[#00F5A0]">{edu.school}</h3>
-                    <span className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-400">{edu.period}</span>
+              {education.map((edu, i) => (
+                <div
+                  key={i}
+                  className="p-5 rounded-xl border transition-all"
+                  style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.borderColor = "color-mix(in srgb, var(--t-accent) 40%, transparent)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.borderColor = "var(--t-border)")
+                  }
+                >
+                  <div className="flex justify-between items-start mb-2 gap-2">
+                    <h3 className="font-bold" style={{ color: "var(--t-accent)" }}>{edu.school}</h3>
+                    <span
+                      className="text-xs px-2 py-1 rounded flex-shrink-0"
+                      style={{ background: "var(--t-bg)", color: "var(--t-text-muted)", border: "1px solid var(--t-border)" }}
+                    >
+                      {edu.period}
+                    </span>
                   </div>
-                  <p className="text-sm font-medium mb-1">{edu.degree}</p>
-                  <p className="text-xs text-gray-500">{edu.details}</p>
+                  <p className="text-sm font-medium mb-1" style={{ color: "var(--t-text)" }}>{edu.degree}</p>
+                  <p className="text-xs" style={{ color: "var(--t-text-sub)" }}>{edu.details}</p>
                 </div>
               ))}
             </div>
@@ -158,44 +203,74 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
 
           {/* Experience */}
           <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Briefcase className="text-[#00F5A0]" size={22} /> Pengalaman Kerja
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+              <Briefcase style={{ color: "var(--t-accent)" }} size={22} /> Pengalaman Kerja
             </h2>
             <div className="space-y-4">
-              {experience.map((exp, index) => (
-                <div key={index} className="bg-[#161B2D] p-5 rounded-xl border border-gray-800">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold">{exp.role}</h3>
-                    <span className="text-xs text-[#00F5A0]">{exp.period}</span>
+              {experience.map((exp, i) => (
+                <div
+                  key={i}
+                  className="p-5 rounded-xl border"
+                  style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+                >
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <h3 className="font-bold" style={{ color: "var(--t-text)" }}>{exp.role}</h3>
+                    <span className="text-xs flex-shrink-0" style={{ color: "var(--t-accent2)" }}>{exp.period}</span>
                   </div>
-                  <p className="text-sm text-gray-300 mb-2">{exp.company}</p>
-                  <p className="text-xs text-gray-500">{exp.description}</p>
+                  <p className="text-sm font-medium mb-2" style={{ color: "var(--t-accent)" }}>{exp.company}</p>
+                  <p className="text-xs" style={{ color: "var(--t-text-sub)" }}>{exp.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Skills Grid */}
+          {/* Skills */}
           <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Code2 className="text-[#00F5A0]" size={22} /> Keahlian Teknis
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+              <Code2 style={{ color: "var(--t-accent)" }} size={22} /> Keahlian Teknis
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-[#161B2D] p-4 rounded-xl border border-gray-800">
-                <h3 className="text-xs uppercase text-gray-500 mb-3">Programming & Frameworks</h3>
+              <div
+                className="p-4 rounded-xl border"
+                style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+              >
+                <h3 className="text-xs uppercase font-bold mb-3" style={{ color: "var(--t-text-sub)" }}>
+                  Programming & Frameworks
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {[...skills.languages, ...skills.frameworks].map((s, i) => (
-                    <span key={i} className="px-3 py-1 bg-[#0A0F1C] border border-gray-700 rounded-full text-xs text-[#00F5A0]">
+                    <span
+                      key={i}
+                      className="px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-default"
+                      style={{
+                        background: "var(--t-accent-bg)",
+                        color: "var(--t-accent)",
+                        borderColor: "color-mix(in srgb, var(--t-accent) 30%, transparent)",
+                      }}
+                    >
                       {s}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="bg-[#161B2D] p-4 rounded-xl border border-gray-800">
-                <h3 className="text-xs uppercase text-gray-500 mb-3">Software & Tools</h3>
+              <div
+                className="p-4 rounded-xl border"
+                style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
+              >
+                <h3 className="text-xs uppercase font-bold mb-3" style={{ color: "var(--t-text-sub)" }}>
+                  Software & Tools
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.tools.map((s, i) => (
-                    <span key={i} className="px-3 py-1 bg-[#0A0F1C] border border-gray-700 rounded-full text-xs text-gray-300">
+                    <span
+                      key={i}
+                      className="px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-default"
+                      style={{
+                        background: "var(--t-bg)",
+                        color: "var(--t-text-muted)",
+                        borderColor: "var(--t-border)",
+                      }}
+                    >
                       {s}
                     </span>
                   ))}
@@ -203,6 +278,7 @@ export const ProfilePage = ({ onBack }: { onBack: () => void }) => {
               </div>
             </div>
           </section>
+
         </div>
       </div>
     </div>

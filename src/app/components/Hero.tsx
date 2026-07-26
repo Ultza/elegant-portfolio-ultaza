@@ -1,78 +1,190 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Terminal, Github, Linkedin, Mail, MapPin, ChevronRight } from 'lucide-react';
+import { Terminal, Linkedin, Mail, MapPin, ChevronRight } from 'lucide-react';
 import userPortrait from "../../assets/bdf3cd406212a8881b29220053c03e271bedd103.png";
 
+// ── Typewriter ─────────────────────────────────────────────────────────────
+const ROLES = ['Pengembang Fullstack', 'IT Support', 'Pengembang Mobile', 'Spesialis GIS'];
+const TYPE_SPEED = 80;
+const DELETE_SPEED = 40;
+const PAUSE_AFTER = 1800;
+const PAUSE_BEFORE = 300;
+
+function useTypewriter(words: string[]) {
+  const [displayed, setDisplayed] = useState('');
+  const [wordIndex, setWordIndex] = useState(0);
+  const [phase, setPhase] = useState<'typing' | 'deleting'>('typing');
+
+  useEffect(() => {
+    const current = words[wordIndex];
+    if (phase === 'typing') {
+      if (displayed.length < current.length) {
+        const t = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), TYPE_SPEED);
+        return () => clearTimeout(t);
+      } else {
+        const t = setTimeout(() => setPhase('deleting'), PAUSE_AFTER);
+        return () => clearTimeout(t);
+      }
+    }
+    if (phase === 'deleting') {
+      if (displayed.length > 0) {
+        const t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), DELETE_SPEED);
+        return () => clearTimeout(t);
+      } else {
+        const t = setTimeout(() => {
+          setWordIndex((i) => (i + 1) % words.length);
+          setPhase('typing');
+        }, PAUSE_BEFORE);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [displayed, phase, wordIndex, words]);
+
+  return displayed;
+}
+
+// ── Count-up ───────────────────────────────────────────────────────────────
+function useCountUp(target: number, duration = 1600, trigger = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!trigger) return;
+    let current = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { setCount(target); clearInterval(timer); }
+      else setCount(Math.floor(current));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration, trigger]);
+  return count;
+}
+
+// ── Hero Component ─────────────────────────────────────────────────────────
 export const Hero = ({ onProfileClick }: { onProfileClick?: () => void }) => {
+  const typedRole = useTypewriter(ROLES);
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#0a192f]">
-      {/* Matrix-like Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#00ff9f 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-      
-      {/* Decorative Gradients */}
-      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-[#00ff9f]/10 blur-[100px] rounded-full" />
-      <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-[#00d4ff]/10 blur-[100px] rounded-full" />
+    <section
+      id="home"
+      className="relative min-h-screen flex items-start pt-10 overflow-hidden"
+      style={{ background: 'var(--t-bg)' }}
+    >
+      {/* Dot grid */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(var(--t-accent) 1px, transparent 1px)',
+          backgroundSize: '30px 30px',
+        }}
+      />
+
+      {/* Glow blobs */}
+      <div className="absolute top-1/4 -right-20 w-96 h-96 blur-[100px] rounded-full opacity-10"
+        style={{ background: 'var(--t-accent)' }} />
+      <div className="absolute bottom-1/4 -left-20 w-96 h-96 blur-[100px] rounded-full opacity-10"
+        style={{ background: 'var(--t-accent2)' }} />
 
       <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+
+        {/* ── Left ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="lg:col-span-7"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00ff9f]/10 border border-[#00ff9f]/20 text-[#00ff9f] text-xs font-mono mb-6">
+          {/* Badge */}
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono mb-6 border"
+            style={{
+              background: 'var(--t-accent-bg)',
+              borderColor: 'color-mix(in srgb, var(--t-accent) 30%, transparent)',
+              color: 'var(--t-accent)',
+            }}
+          >
             <Terminal size={14} />
-            <span>Ready for new opportunities</span>
+            <span>Siap untuk peluang baru</span>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            Hi, I'm <span className="text-[#00ff9f]">Ul Tazasyah</span>
+
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight" style={{ color: 'var(--t-text)' }}>
+            Halo, Saya <span style={{ color: 'var(--t-accent)' }}>Ul Tazasyah</span>
           </h1>
 
-          <div className="mb-8 space-y-3 pl-2 border-l-2 border-[#00ff9f]">
-            {[
-              "Fullstack Developer",
-              "IT Support",
-              "Mobile Developer"
-            ].map((role) => (
-              <p key={role} className="text-[#00ff9f] text-lg md:text-xl font-medium">
-                {role}
-              </p>
-            ))}
+          {/* Typewriter */}
+          <div
+            className="mb-8 pl-3 border-l-2 min-h-[2.25rem] flex items-center"
+            style={{ borderColor: 'var(--t-accent)' }}
+          >
+            <span className="text-lg md:text-2xl font-mono font-semibold" style={{ color: 'var(--t-accent)' }}>
+              {typedRole}
+              <span
+                className="inline-block w-[2px] h-5 ml-0.5 align-middle animate-pulse"
+                style={{ background: 'var(--t-accent)' }}
+              />
+            </span>
           </div>
-          
-          <p className="text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed font-light">
-            "Bridging technical expertise in IT systems with environmental data management."
+
+          <p className="text-xl max-w-2xl mb-10 leading-relaxed font-light" style={{ color: 'var(--t-text-muted)' }}>
+            "Menjembatani keahlian teknis di bidang sistem IT dengan pengelolaan data lingkungan."
           </p>
-          
-          <div className="flex flex-wrap gap-5 mb-12">
+
+          {/* CTA buttons */}
+          <div className="flex flex-wrap gap-5">
             <a
               href="#projects"
-              className="px-8 py-4 bg-[#00ff9f] text-[#0a192f] rounded-lg font-bold flex items-center gap-2 hover:bg-[#00e08b] transition-all transform hover:-translate-y-1 shadow-lg shadow-[#00ff9f]/20"
+              className="px-8 py-4 rounded-lg font-bold flex items-center gap-2 transition-all transform hover:-translate-y-1 shadow-lg"
+              style={{
+                background: 'var(--t-accent)',
+                color: 'var(--t-bg)',
+                boxShadow: '0 8px 24px color-mix(in srgb, var(--t-accent) 25%, transparent)',
+              }}
             >
-              View Projects <ChevronRight size={20} />
+              Lihat Proyek <ChevronRight size={20} />
             </a>
             <button
               onClick={onProfileClick}
-              className="px-8 py-4 bg-[#112240] text-[#00ff9f] rounded-lg font-bold border border-[#00ff9f]/30 hover:bg-[#1d2d50] transition-all transform hover:-translate-y-1"
+              className="px-8 py-4 rounded-lg font-bold border transition-all transform hover:-translate-y-1"
+              style={{
+                background: 'var(--t-bg-card)',
+                color: 'var(--t-accent)',
+                borderColor: 'color-mix(in srgb, var(--t-accent) 30%, transparent)',
+              }}
             >
-              Personal Profile
+              Profil Pribadi
             </button>
+
             <div className="flex items-center gap-4 px-2">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#112240] text-slate-400 rounded-lg hover:text-[#00ff9f] hover:bg-[#1d2d50] transition-all border border-slate-800">
+              <a
+                href="https://linkedin.com/in/ul-tazasyah-274a2a392"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 rounded-lg border transition-all"
+                style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)', color: 'var(--t-text-muted)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--t-accent)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--t-text-muted)')}
+              >
                 <Linkedin size={20} />
               </a>
-              <a href="mailto:ultazanagan111@gmail.com" className="p-3 bg-[#112240] text-slate-400 rounded-lg hover:text-[#00ff9f] hover:bg-[#1d2d50] transition-all border border-slate-800">
+              <a
+                href="mailto:ultazanagan111@gmail.com"
+                className="p-3 rounded-lg border transition-all"
+                style={{ background: 'var(--t-bg-card)', borderColor: 'var(--t-border)', color: 'var(--t-text-muted)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--t-accent)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--t-text-muted)')}
+              >
                 <Mail size={20} />
               </a>
-              <div className="flex items-center gap-2 text-slate-500 text-sm ml-2">
-                <MapPin size={16} className="text-[#00ff9f]/50" />
+              <div className="flex items-center gap-2 text-sm ml-2" style={{ color: 'var(--t-text-sub)' }}>
+                <MapPin size={16} style={{ color: 'var(--t-accent)', opacity: 0.5 }} />
                 <span>Nagan Raya, Aceh</span>
               </div>
             </div>
           </div>
+
         </motion.div>
 
+        {/* ── Right: Photo ── */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -80,29 +192,31 @@ export const Hero = ({ onProfileClick }: { onProfileClick?: () => void }) => {
           className="lg:col-span-5 relative"
         >
           <div className="relative w-full aspect-square md:max-w-md mx-auto">
-            {/* Animated Ring Decor */}
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-              className="absolute -inset-4 border border-dashed border-[#00ff9f]/20 rounded-full"
+              transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
+              className="absolute -inset-4 border border-dashed rounded-full"
+              style={{ borderColor: 'color-mix(in srgb, var(--t-accent) 20%, transparent)' }}
             />
-            
-            {/* Glow effect */}
-            <div className="absolute -inset-2 bg-gradient-to-tr from-[#00ff9f]/20 to-[#00d4ff]/20 rounded-3xl blur-2xl opacity-50" />
-            
-            {/* Container Foto dengan Background Merah */}
-            <div className="relative h-full w-full rounded-3xl overflow-hidden border-2 border-slate-800/50 shadow-2xl bg-red-600 group transition-colors duration-700 hover:bg-[#00ff9f]">
+            <div
+              className="absolute -inset-2 rounded-3xl blur-2xl opacity-50"
+              style={{ background: 'linear-gradient(to top right, color-mix(in srgb, var(--t-accent) 20%, transparent), color-mix(in srgb, var(--t-accent2) 20%, transparent))' }}
+            />
+            <div
+              className="relative h-full w-full rounded-3xl overflow-hidden border-2 shadow-2xl group transition-colors duration-700"
+              style={{ borderColor: 'var(--t-border)', background: 'var(--t-accent2)' }}
+            >
               <img
                 src={userPortrait}
                 alt="Ul Tazasyah Portrait"
                 className="w-full h-full object-cover object-top grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105"
               />
-              {/* Overlay gradasi halus agar foto menyatu dengan tema dark */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a192f]/40 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
           </div>
         </motion.div>
       </div>
+
     </section>
   );
 };
