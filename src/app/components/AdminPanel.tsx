@@ -3,13 +3,14 @@ import supabase from '../supabaseClient';
 import { AdminPublish } from './AdminPublish';
 import { AdminCertificates } from './AdminCertificates';
 import { AdminLearning } from './AdminLearning';
+import { AdminExperiences } from './AdminExperiences';
 
 interface AdminPanelProps {
   onLogout?: () => void;
 }
 
 export const AdminPanel = ({ onLogout }: AdminPanelProps) => {
-  const [activeTab, setActiveTab] = useState<'messages' | 'publish' | 'certificates' | 'learning'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'publish' | 'certificates' | 'learning' | 'experiences'>('messages');
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export const AdminPanel = ({ onLogout }: AdminPanelProps) => {
     { key: 'publish',      label: 'Artikel'       },
     { key: 'learning',     label: 'Learning'      },
     { key: 'certificates', label: 'Sertifikat'    },
+    { key: 'experiences',  label: 'Pengalaman'    },
   ];
 
   return (
@@ -94,6 +96,7 @@ export const AdminPanel = ({ onLogout }: AdminPanelProps) => {
       {activeTab === 'publish'      && <AdminPublish />}
       {activeTab === 'learning'     && <AdminLearning />}
       {activeTab === 'certificates' && <AdminCertificates />}
+      {activeTab === 'experiences'  && <AdminExperiences />}
     </div>
   );
 };
