@@ -8,6 +8,7 @@ interface ExperienceRecord {
   period: string;
   description: string;
   skills: string[];
+  image_url?: string | null;
   is_latest: boolean;
   created_at: string;
 }
@@ -18,6 +19,7 @@ interface ExperienceFormData {
   period: string;
   description: string;
   skillsText: string;
+  photoFile: File | null;
   is_latest: boolean;
 }
 
@@ -48,6 +50,7 @@ const normalizeExperience = (item: Partial<ExperienceRecord> | null | undefined)
     period: String(item.period ?? '').trim(),
     description: String(item.description ?? '').trim(),
     skills: parseSkills(item.skills),
+    image_url: item.image_url ?? null,
     is_latest: Boolean(item.is_latest),
     created_at: String(item.created_at ?? new Date().toISOString()),
   };
@@ -60,6 +63,7 @@ export const AdminExperiences = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ExperienceFormData>({
     role: '',
@@ -67,6 +71,7 @@ export const AdminExperiences = () => {
     period: '',
     description: '',
     skillsText: '',
+    photoFile: null,
     is_latest: false,
   });
 
@@ -113,6 +118,47 @@ export const AdminExperiences = () => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    if (file && !file.type.startsWith('image/')) {
+      setSubmitError('File yang diunggah harus berupa gambar.');
+      e.target.value = '';
+      setFormData((prev) => ({ ...prev, photoFile: null }));
+      return;
+    }
+
+    setSubmitError(null);
+    setFormData((prev) => ({ ...prev, photoFile: file }));
+  };
+
+  const resetExperienceForm = () => {
+    setEditingId(null);
+    setFormData({
+      role: '',
+      company: '',
+      period: '',
+      description: '',
+      skillsText: '',
+      photoFile: null,
+      is_latest: false,
+    });
+  };
+
+  const startEditExperience = (experience: ExperienceRecord) => {
+    setEditingId(experience.id);
+    setSubmitError(null);
+    setFormData({
+      role: experience.role,
+      company: experience.company,
+      period: experience.period,
+      description: experience.description,
+      skillsText: experience.skills.join(', '),
+      photoFile: null,
+      is_latest: experience.is_latest,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -129,15 +175,92 @@ export const AdminExperiences = () => {
         return;
       }
 
+      let uploadedImageUrl: string | null = null;
+      let currentImageUrl: string | null = null;
+
+      if (editingId) {
+        const currentExperience = experiences.find((item) => item.id === editingId);
+        currentImageUrl = currentExperience?.image_url ?? null;
+      }
+
+      if (formData.photoFile) {
+        const uniqueFileName = `${Date.now()}-${formData.photoFile.name.replace(/\s+/g, '-')}`;
+        const { data: uploadedFile, error: uploadError } = await supabase
+          .storage
+          .from('experience-photos')
+          .upload(uniqueFileName, formData.photoFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: formData.photoFile.type || 'image/jpeg',
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('experience-photos')
+          .getPublicUrl(uploadedFile?.path ?? uniqueFileName);
+
+        uploadedImageUrl = publicUrlData.publicUrl;
+      }
+
       const payload = {
         role,
         company,
         period: formData.period.trim() || 'Tidak ditentukan',
         description: formData.description.trim(),
         skills: parseSkills(formData.skillsText),
+        image_url: uploadedImageUrl ?? currentImageUrl,
         is_latest: formData.is_latest,
         created_at: new Date().toISOString(),
       };
+
+      if (editingId) {
+        const { data, error } = await supabase
+          .from('experiences')
+          .update(payload)
+          .eq('id', editingId)
+          .select();
+
+        if (error) {
+          if (error.message.toLowerCase().includes('image_url') || error.message.toLowerCase().includes('column')) {
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('experiences')
+              .update({
+                ...payload,
+                image_url: undefined,
+              })
+              .eq('id', editingId)
+              .select();
+
+            if (fallbackError) {
+              throw fallbackError;
+            }
+
+            const updated = normalizeExperience(Array.isArray(fallbackData) ? fallbackData[0] : null);
+            if (updated) {
+              setExperiences((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
+            }
+
+            resetExperienceForm();
+            setSuccessMessage('Pengalaman kerja berhasil diperbarui tanpa foto dokumentasi.');
+            return;
+          }
+
+          throw error;
+        }
+
+        const updated = normalizeExperience(Array.isArray(data) ? data[0] : null);
+        if (updated) {
+          setExperiences((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
+        }
+
+        resetExperienceForm();
+        setSuccessMessage('Pengalaman kerja berhasil diperbarui.');
+        return;
+      }
 
       const { data, error } = await supabase
         .from('experiences')
@@ -145,6 +268,31 @@ export const AdminExperiences = () => {
         .select();
 
       if (error) {
+        if (error.message.toLowerCase().includes('image_url') || error.message.toLowerCase().includes('column')) {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('experiences')
+            .insert([
+              {
+                ...payload,
+                image_url: undefined,
+              },
+            ])
+            .select();
+
+          if (fallbackError) {
+            throw fallbackError;
+          }
+
+          const inserted = normalizeExperience(Array.isArray(fallbackData) ? fallbackData[0] : null);
+          if (inserted) {
+            setExperiences((prev) => [inserted, ...prev]);
+          }
+
+          resetExperienceForm();
+          setSuccessMessage('Pengalaman kerja berhasil ditambahkan tanpa foto dokumentasi.');
+          return;
+        }
+
         throw error;
       }
 
@@ -153,19 +301,11 @@ export const AdminExperiences = () => {
         setExperiences((prev) => [inserted, ...prev]);
       }
 
-      setFormData({
-        role: '',
-        company: '',
-        period: '',
-        description: '',
-        skillsText: '',
-        is_latest: false,
-      });
-
+      resetExperienceForm();
       setSuccessMessage('Pengalaman kerja berhasil ditambahkan.');
     } catch (error) {
       console.error('Insert experience error:', error);
-      const message = error instanceof Error ? error.message : 'Gagal menambahkan pengalaman kerja.';
+      const message = error instanceof Error ? error.message : 'Gagal menyimpan pengalaman kerja.';
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
@@ -221,7 +361,9 @@ export const AdminExperiences = () => {
       )}
 
       <form onSubmit={handleSubmit} className="bg-[#112240] p-6 rounded-lg border border-slate-700 space-y-4">
-        <h3 className="text-xl font-bold text-white">Tambah Pengalaman Kerja</h3>
+        <h3 className="text-xl font-bold text-white">
+          {editingId ? 'Edit Pengalaman Kerja' : 'Tambah Pengalaman Kerja'}
+        </h3>
 
         <div>
           <label className="block text-white text-sm font-semibold mb-2">
@@ -296,6 +438,25 @@ export const AdminExperiences = () => {
           <p className="text-xs text-slate-400 mt-1">Dipisahkan dengan koma, lalu akan otomatis diubah menjadi array.</p>
         </div>
 
+        <div>
+          <label className="block text-white text-sm font-semibold mb-2">
+            Foto Dokumentasi Kegiatan
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full px-4 py-3 bg-[#0a192f] text-white border border-slate-600 rounded-lg focus:border-[#00ff9f] focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#00ff9f] file:text-[#0a192f] file:font-semibold file:cursor-pointer"
+          />
+          <p className="text-xs text-slate-400 mt-1">
+            {isSubmitting
+              ? 'Mengunggah foto ke Supabase Storage...'
+              : formData.photoFile
+                ? `File dipilih: ${formData.photoFile.name}`
+                : 'Pilih gambar dokumentasi kerja untuk ditampilkan di timeline.'}
+          </p>
+        </div>
+
         <label className="flex items-center gap-3 text-white text-sm font-medium">
           <input
             type="checkbox"
@@ -312,8 +473,18 @@ export const AdminExperiences = () => {
           disabled={isSubmitting}
           className="w-full px-4 py-2 bg-[#00ff9f] text-[#0a192f] font-bold rounded-lg hover:bg-[#00cc7f] disabled:opacity-50 transition-colors"
         >
-          {isSubmitting ? 'Menyimpan...' : 'Tambah Pengalaman'}
+          {isSubmitting ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Tambah Pengalaman'}
         </button>
+
+        {editingId && (
+          <button
+            type="button"
+            onClick={resetExperienceForm}
+            className="w-full px-4 py-2 border border-slate-600 text-white font-semibold rounded-lg hover:border-slate-400 transition-colors"
+          >
+            Batal Edit
+          </button>
+        )}
       </form>
 
       <div className="bg-[#112240] rounded-lg border border-slate-700 overflow-hidden">
@@ -343,13 +514,22 @@ export const AdminExperiences = () => {
                     <td className="px-4 py-3 text-white text-sm">{exp.period}</td>
                     <td className="px-4 py-3 text-white text-sm">{exp.is_latest ? 'Ya' : 'Tidak'}</td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setDeleteConfirm(exp.id)}
-                        className="px-3 py-2 text-xs font-semibold border border-red-500/50 text-red-400 rounded hover:bg-red-500/10 transition-colors"
-                      >
-                        Hapus
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startEditExperience(exp)}
+                          className="px-3 py-2 text-xs font-semibold border border-[#00ff9f]/60 text-[#00ff9f] rounded hover:bg-[#00ff9f]/10 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirm(exp.id)}
+                          className="px-3 py-2 text-xs font-semibold border border-red-500/50 text-red-400 rounded hover:bg-red-500/10 transition-colors"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
