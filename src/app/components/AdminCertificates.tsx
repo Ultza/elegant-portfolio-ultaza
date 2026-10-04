@@ -6,6 +6,7 @@ interface Certificate {
   title: string;
   issuer: string;
   file: string;
+  pdf_url?: string;
   date: string;
   category: string;
   logo_url: string;
@@ -15,7 +16,7 @@ interface Certificate {
 interface FormData {
   title: string;
   issuer: string;
-  file: string;
+  pdf_file: File | null;
   date: string;
   category: string;
   logo_url: string;
@@ -35,7 +36,7 @@ export const AdminCertificates = () => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     issuer: '',
-    file: '',
+    pdf_file: null,
     date: '',
     category: '',
     logo_url: '',
@@ -72,13 +73,10 @@ export const AdminCertificates = () => {
   const sanitizeFilePath = (filePath: string): string => {
     if (!filePath) return '';
 
-    // If it's already a web path starting with /certificates/, clean it up
     if (filePath.startsWith('/certificates/')) {
-      // Handle double slashes and ensure proper format
       return filePath.replace(/\/certificates\/+/, '/certificates/');
     }
 
-    // If it's a file:// URL, extract filename and convert to web path
     if (filePath.startsWith('file:///')) {
       try {
         const url = new URL(filePath);
@@ -91,7 +89,6 @@ export const AdminCertificates = () => {
       }
     }
 
-    // If it's a Windows or Unix path, extract filename
     if (filePath.includes('\\') || filePath.includes('/')) {
       const filename = filePath.split('\\').pop() || filePath.split('/').pop() || '';
       if (filename) {
@@ -99,7 +96,6 @@ export const AdminCertificates = () => {
       }
     }
 
-    // If it's just a filename, add certificates path
     if (!filePath.includes('/') && !filePath.includes('\\')) {
       return `/certificates/${filePath}`;
     }
@@ -107,18 +103,70 @@ export const AdminCertificates = () => {
     return '';
   };
 
-  // Handle form input
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
-  // Save certificate
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    if (file && file.type !== 'application/pdf') {
+      setSubmitError('File yang diunggah harus berformat PDF.');
+      e.target.value = '';
+      setFormData((prev) => ({ ...prev, pdf_file: null }));
+      return;
+    }
+
+    setSubmitError(null);
+    setFormData((prev) => ({ ...prev, pdf_file: file }));
+  };
+
+  const saveCertificateRecord = async (payload: Record<string, unknown>, isEditing: boolean) => {
+    if (isEditing && editingId) {
+      const { error } = await supabase.from('certificates').update(payload).eq('id', editingId);
+      if (error) {
+        if (error.message.toLowerCase().includes('pdf_url') || error.message.toLowerCase().includes('column')) {
+          const { error: fallbackError } = await supabase
+            .from('certificates')
+            .update({ ...payload, pdf_url: undefined })
+            .eq('id', editingId);
+
+          if (fallbackError) {
+            throw fallbackError;
+          }
+          return;
+        }
+        throw error;
+      }
+      return;
+    }
+
+    const { data, error } = await supabase.from('certificates').insert([payload]).select();
+    if (error) {
+      if (error.message.toLowerCase().includes('pdf_url') || error.message.toLowerCase().includes('column')) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('certificates')
+          .insert([{ ...payload, pdf_url: undefined }])
+          .select();
+
+        if (fallbackError) {
+          throw fallbackError;
+        }
+
+        return fallbackData;
+      }
+      throw error;
+    }
+
+    return data;
+  };
+
   const handleSaveCertificate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -126,16 +174,62 @@ export const AdminCertificates = () => {
     setSuccessMessage(null);
 
     try {
-      if (!formData.title || !formData.issuer || !formData.file || !formData.category) {
-        setSubmitError('Semua field wajib diisi');
+      const existingCertificate = editingId
+        ? certificates.find((cert) => cert.id === editingId)
+        : null;
+      const existingPdfUrl = existingCertificate?.pdf_url || existingCertificate?.file || '';
+
+      if (!formData.title || !formData.issuer || !formData.category) {
+        setSubmitError('Judul, penerbit, dan kategori wajib diisi.');
         setIsSubmitting(false);
         return;
+      }
+
+      const pdfFile = formData.pdf_file;
+      const hasExistingPdf = Boolean(existingPdfUrl);
+
+      if (!pdfFile && !hasExistingPdf) {
+        setSubmitError('Harus upload file PDF baru atau pilih sertifikat yang sudah memiliki file.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      let finalPdfUrl = existingPdfUrl;
+
+      if (pdfFile) {
+        const uniqueFileName = `${Date.now()}-${pdfFile.name.replace(/\s+/g, '-')}`;
+        const storagePath = `${uniqueFileName}`;
+
+        const { data: uploadedFile, error: uploadError } = await supabase
+          .storage
+          .from('certificates')
+          .upload(storagePath, pdfFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'application/pdf',
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        if (!uploadedFile) {
+          throw new Error('Upload PDF gagal: file tidak tersedia.');
+        }
+
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('certificates')
+          .getPublicUrl(uploadedFile.path);
+
+        finalPdfUrl = publicUrlData.publicUrl;
       }
 
       const certificateData = {
         title: formData.title,
         issuer: formData.issuer,
-        file: sanitizeFilePath(formData.file),
+        file: finalPdfUrl,
+        pdf_url: finalPdfUrl,
         date: formData.date,
         category: formData.category,
         logo_url: formData.logo_url,
@@ -143,52 +237,29 @@ export const AdminCertificates = () => {
       };
 
       if (editingId) {
-        // Update existing certificate
-        const { error } = await supabase
-          .from('certificates')
-          .update(certificateData)
-          .eq('id', editingId);
-
-        if (error) {
-          console.error('Update error:', error);
-          setSubmitError(`Gagal update sertifikat: ${error.message}`);
-          setIsSubmitting(false);
-          return;
-        }
-
-        setCertificates(
-          certificates.map((cert) =>
+        await saveCertificateRecord(certificateData, true);
+        setCertificates((prev) =>
+          prev.map((cert) =>
             cert.id === editingId
-              ? { ...cert, ...certificateData }
+              ? { ...cert, ...certificateData, file: finalPdfUrl, pdf_url: finalPdfUrl }
               : cert
           )
         );
         setSuccessMessage('Sertifikat berhasil diperbarui');
       } else {
-        // Create new certificate
-        const { data, error } = await supabase
-          .from('certificates')
-          .insert([certificateData])
-          .select();
+        const result = await saveCertificateRecord(certificateData, false);
+        const createdCertificate = Array.isArray(result) ? result[0] : result;
 
-        if (error) {
-          console.error('Insert error:', error);
-          setSubmitError(`Gagal membuat sertifikat: ${error.message}`);
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          setCertificates([data[0], ...certificates]);
+        if (createdCertificate) {
+          setCertificates((prev) => [createdCertificate, ...prev]);
         }
         setSuccessMessage('Sertifikat berhasil dibuat');
       }
 
-      // Reset form
       setFormData({
         title: '',
         issuer: '',
-        file: '',
+        pdf_file: null,
         date: '',
         category: '',
         logo_url: '',
@@ -197,17 +268,17 @@ export const AdminCertificates = () => {
       setEditingId(null);
     } catch (err) {
       console.error('Save error:', err);
-      setSubmitError('Terjadi kesalahan saat menyimpan sertifikat');
+      const message = err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan sertifikat';
+      setSubmitError(message);
     }
     setIsSubmitting(false);
   };
 
-  // Edit certificate
   const handleEditCertificate = (certificate: Certificate) => {
     setFormData({
       title: certificate.title,
       issuer: certificate.issuer,
-      file: certificate.file,
+      pdf_file: null,
       date: certificate.date,
       category: certificate.category,
       logo_url: certificate.logo_url,
@@ -216,7 +287,6 @@ export const AdminCertificates = () => {
     setShowForm(true);
   };
 
-  // Delete certificate
   const handleDeleteCertificate = async (id: string) => {
     try {
       const { error } = await supabase.from('certificates').delete().eq('id', id);
@@ -235,14 +305,13 @@ export const AdminCertificates = () => {
     }
   };
 
-  // Cancel form
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingId(null);
     setFormData({
       title: '',
       issuer: '',
-      file: '',
+      pdf_file: null,
       date: '',
       category: '',
       logo_url: '',
@@ -375,20 +444,26 @@ export const AdminCertificates = () => {
               />
             </div>
 
-            {/* File URL */}
+            {/* PDF File Upload */}
             <div>
               <label className="block text-white text-sm font-semibold mb-2">
-                URL File PDF <span className="text-red-500">*</span>
+                File PDF Sertifikat {editingId ? '' : <span className="text-red-500">*</span>}
               </label>
               <input
-                type="text"
-                name="file"
-                value={formData.file}
-                onChange={handleInputChange}
-                placeholder="/certificates/nama-file.pdf"
-                className="w-full px-4 py-2 bg-[#0a192f] text-white border border-slate-600 rounded-lg focus:border-[#00ff9f] focus:outline-none"
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                className="w-full px-4 py-3 bg-[#0a192f] text-white border border-slate-600 rounded-lg focus:border-[#00ff9f] focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#00ff9f] file:text-[#0a192f] file:font-semibold file:cursor-pointer"
               />
-              <p className="text-xs text-slate-400 mt-1">Path ke file PDF sertifikat</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {isSubmitting
+                  ? 'Mengunggah dan menyimpan PDF ke Supabase Storage...'
+                  : formData.pdf_file
+                    ? `File dipilih: ${formData.pdf_file.name}`
+                    : editingId
+                      ? 'Biarkan kosong jika tidak ingin mengganti PDF lama.'
+                      : 'Pilih file PDF yang akan diunggah.'}
+              </p>
             </div>
 
             {/* Logo URL */}
